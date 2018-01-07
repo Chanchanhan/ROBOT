@@ -13,8 +13,8 @@
 
 ### Libs:
 - Eigen
-- Sophus: pose procession
-- Opencv: img procession
+- Sophus: pose processing
+- Opencv: img processing
 - glog
  
 ### interfaces:
