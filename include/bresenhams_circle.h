@@ -3,7 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 
-void BresenhamCircle(cv::Point2d vertex,int radius);
+void BresenhamCircle(cv::Point2i veterx,int radius,std::vector<cv::Point2i>& sampleset);
 
 
 #endif

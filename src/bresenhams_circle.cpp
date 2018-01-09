@@ -1,29 +1,40 @@
-#include <opencv2/opencv.hpp>
 #include <vector>
 #include <iostream>
+#include <set>
+
+#include <opencv2/opencv.hpp>
 
 using namespace cv;
 using namespace std;
 
-void BresenhamCircle(Point2d veterx,int radius)
+struct cmp {
+    bool operator()(const Point2i &a, const Point2i &b) {
+        if (a.y != b.y)
+            return a.y < b.y;
+        return a.x < b.x;
+    }
+};
+
+void BresenhamCircle(Point2i veterx,int radius,vector<Point2i>& sampleset)
 {
+
     int c_x = 0;
     int c_y = radius;
     double d = 1 - radius;
 
-    vector<Point2d> point_set;
+    set<Point2i,cmp> point_set;
 
     while(c_x<c_y)
     {
-        point_set.emplace_back(c_x,c_y);
-        point_set.emplace_back(c_y,c_x);
-        point_set.emplace_back(-c_x,c_y);
-        point_set.emplace_back(-c_y,c_x);
+        point_set.insert({c_x,c_y});
+        point_set.insert({c_y,c_x});
+        point_set.insert({-c_x,c_y});
+        point_set.insert({-c_y,c_x});
 
-        point_set.emplace_back(-c_x,-c_y);
-        point_set.emplace_back(-c_y,-c_x);
-        point_set.emplace_back(c_x,-c_y);
-        point_set.emplace_back(c_y,-c_x);
+        point_set.insert({-c_x,-c_y});
+        point_set.insert({-c_y,-c_x});
+        point_set.insert({c_x,-c_y});
+        point_set.insert({c_y,-c_x});
 
         if(d<0)
         {
@@ -35,18 +46,13 @@ void BresenhamCircle(Point2d veterx,int radius)
             c_y--;
         }
         c_x++;
-
     }
 
 
-    Mat draw = Mat::zeros(300,300,CV_8U);
     for(auto& p:point_set)
     {
-        draw.at<unsigned char>(veterx.x + p.x,veterx.y + p.y) = 255;
+        sampleset.emplace_back(veterx.x + p.x,veterx.y + p.y);
     }
-    imshow("result",draw);
-    waitKey(0);
-    cout<<point_set<<endl;
 
 }
 

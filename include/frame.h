@@ -4,9 +4,11 @@
 class Frame
 {
 public:
-	cv::Mat *img;
+	cv::Mat img;
 	//SE3D dpose;
 	//SE3D grondTruthPose;
+    cv::Mat segmentation;
+
 	unsigned int index;
 };
 

@@ -17,7 +17,7 @@
 - Opencv: img processing
 - glog
  
-### interfaces:
+### Interfaces:
 ```
 1. LoadImg(File *file,Type type); 
 2. GettingContour(Model model,Frame frame); 
@@ -27,7 +27,7 @@
 6. ....(Energy Optimization)
 ```
 
-### datastructure
+### Datastructure
 ```
 class Frame
 { 
