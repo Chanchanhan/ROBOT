@@ -1,7 +1,10 @@
 #include <iostream>
 #include "bresenhams_circle.h"
+<<<<<<< HEAD:TestUnits/test.cpp
+=======
 #include "histogram.h"
 
+>>>>>>> origin/cgy:src/test.cpp
 using namespace std;
 using namespace cv;
 int main()
@@ -26,7 +29,7 @@ int main()
 
 
 
-    cout << "ROBOT:region based object tracking" << endl;
+    cout << "ROBOT:region based glm tracking" << endl;
 	return 0;
 }
 
