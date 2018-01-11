@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
 project(ROBOT)
 enable_testing()
+set( CMAKE_CXX_COMPILER "g++" )
+
 # set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CmakeModules/)
 
@@ -22,7 +24,7 @@ endif()
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Sophus REQUIRED)
-find_package(glog 0.3.5 REQUIRED)
+find_package(glog  REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 
@@ -41,8 +43,7 @@ INCLUDE_DIRECTORIES(
   ${PROJECT_SOURCE_DIR}/include/
   ${OPENGL_INCLUDE_DIRS}
   ${GLUT_INCLUDE_DIRS}
-  BEFORE ${GLOG_INCLUDE_DIRS}
-
+  ${GLOG_INCLUDE_DIRS}
 )
 
 # SET_TARGET_PROPERTIES(ROBOT PROPERTIES    RUNTIME_OUTPUT_DIRECTORY  "${PROJECT_SOURCE_DIR}/bin")
@@ -50,7 +51,7 @@ INCLUDE_DIRECTORIES(
 ADD_DEFINITIONS(/D_USE_MATH_DEFINES)
 
 #LIST(APPEND LINK_LIBS ${PROJECT_SOURCE_DIR}/DBoW3001d.lib ${OpenCV_LIBS})
-LIST(APPEND LINK_LIBS glog::glog  ${OpenCV_LIBS} ${Sophus_LIBRARIES}  ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+LIST(APPEND LINK_LIBS glog::glog  ${OpenCV_LIBS} ${Sophus_LIBRARIES}  ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} )
 #TARGET_LINK_LIBRARIES(ROBOT ${LINK_LIBS})
 
 
@@ -63,7 +64,7 @@ TARGET_LINK_LIBRARIES(test-cgy ${LINK_LIBS})
 
 
 #add test unit 2
-add_executable(test-DataProcessor TestUnits//test_DataProcessor.cpp  ${HEADERS} ${SOURCE_FILES})
+add_executable(test-DataProcessor TestUnits/test_DataProcessor.cpp  ${HEADERS} ${SOURCE_FILES})
 add_test(test-DataProcessor test-DataProcessor)
 SET_TARGET_PROPERTIES(test-DataProcessor PROPERTIES    RUNTIME_OUTPUT_DIRECTORY  "${PROJECT_SOURCE_DIR}/bin")
 TARGET_LINK_LIBRARIES( test-DataProcessor  ${LINK_LIBS} ) 

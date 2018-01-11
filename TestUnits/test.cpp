@@ -1,6 +1,5 @@
 #include <iostream>
 #include "bresenhams_circle.h"
-
 using namespace std;
 using namespace cv;
 int main()

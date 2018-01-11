@@ -3,7 +3,7 @@
 //
 
 #include "Model.h"
-
+#include <glog/logging.h>
 Model::Model() {
     model_ = NULL;
 }
