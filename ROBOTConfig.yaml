@@ -5,22 +5,11 @@
 LOG_Threshold: 1
 Init_Frame_Index: 0
 USE_GT_DATA: 0
-#USE_VIDEO: 0
-
 
 
 # Input/Output directories and Sets
-Output.Directory.LOG_DIR: "/home/qqh/output/ObjTrackLog/"
-#USE_VIDEO: 0
-#Input.Directory.Obj: "/home/qqh/DataSets/3D Rigid Tracking from RGB Images Dataset/box/openbox.obj"
-#Input.Directory.Video: "/home/qqh/DataSets/3D Rigid Tracking from RGB Images Dataset/box/video1/"
-#Input.Directory.GroudTruth: "/home/qqh/DataSets/3D Rigid Tracking from RGB Images Dataset/box/video1/poseGT.txt"
-#Calib_FX: 2666.67
-#Calib_FY: 2666.67
-#Calib_CX: 960
-#Calib_CY: 540
-#VIDEO_WIDTH: 1920
-#VIDEO_HEIGHT: 1080
+Output.Directory.LOG_DIR: "./Log/"
+
 
 USE_VIDEO: 1
 Calib_FX: 832.560809

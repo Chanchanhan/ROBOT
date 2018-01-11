@@ -15,7 +15,6 @@ DataPaser::DataPaser(const int &argc,char **argv,const OcvYamlConfig& config)
       std::string str;
       std::getline(gtData,str) ;
       k++;
-
     } 
     float gtPose[6]={0};
     std::string str,filename;

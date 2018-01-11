@@ -3,8 +3,6 @@ project(ROBOT)
 enable_testing()
 # set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CmakeModules/)
-set( CMAKE_CXX_COMPILER "g++" )
-set( CMAKE_BUILD_TYPE "Debug" )
 ##############################################################################
 # C++14 support
 ##############################################################################
