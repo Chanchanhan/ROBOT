@@ -15,7 +15,7 @@ source_group("Include" FILES ${HEADERS})
 source_group("Src" FILES ${SOURCE_FILES}) 
 #set(SOURCE_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/include/*.h)
 
-add_executable(ROBOT ${SOURCE_FILES} ${HEADERS})
+add_executable(ROBOT ${SOURCE_FILES} ${HEADERS} src/Sgementation.cpp include/Sgementation.h)
 
 
 INCLUDE_DIRECTORIES(
