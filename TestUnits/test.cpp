@@ -14,7 +14,7 @@ int main()
     imshow("result",draw);
     waitKey(0);
 
-    cout << "ROBOT:region based object tracking" << endl;
+    cout << "ROBOT:region based glm tracking" << endl;
 	return 0;
 }
 

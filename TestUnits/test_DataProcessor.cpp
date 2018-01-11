@@ -2,7 +2,6 @@
 #include <glog/logging.h>
 
 #include "dataPaser.h"
-#include "OcvYamlConfig.h"
 int main(int argc, char* argv[]) {
       
   google::InitGoogleLogging(argv[0]);  

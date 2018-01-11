@@ -1,9 +1,9 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
+#include<iostream>
 #include <string>
 #include <glog/logging.h>
-#include<iostream>
 #include "OcvYamlConfig.h"
   class Config
   {

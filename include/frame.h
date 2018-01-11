@@ -7,7 +7,7 @@ public:
 	cv::Mat img;
 	//SE3D dpose;
 	//SE3D grondTruthPose;
-    cv::Mat segmentation;
+	cv::Mat segmentation;
 
 	unsigned int index;
 };
