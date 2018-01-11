@@ -1,10 +1,7 @@
 #include <iostream>
 #include "bresenhams_circle.h"
-<<<<<<< HEAD:TestUnits/test.cpp
-=======
 #include "histogram.h"
 
->>>>>>> origin/cgy:src/test.cpp
 using namespace std;
 using namespace cv;
 int main()

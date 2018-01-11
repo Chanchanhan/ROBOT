@@ -1,3 +1,5 @@
+#ifndef ROBOT_FRAME_H
+#define ROBOT_FRAME_H
 #include <opencv2/opencv.hpp>
 
 
@@ -15,7 +17,6 @@ public:
 	void segment();
 };
 
-void Frame::segment() {
 
-}
 
+#endif

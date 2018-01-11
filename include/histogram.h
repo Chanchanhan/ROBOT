@@ -1,3 +1,6 @@
+#ifndef ROBOT_HISTOGRAM_
+#define ROBOT_HISTOGRAM_
+
 #include <vector>
 #include "frame.h"
 
@@ -13,3 +16,4 @@ cv::Mat VizHistImg(const Histogram& img);
 
 
 //UpdatingHistorgramYUV(Frame curFrame,VerticesNearToContour);
+#endif
