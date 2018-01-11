@@ -3,7 +3,7 @@
 
 using namespace std;
 using namespace cv;
-void UpdatingHistorgram(const Frame& curFrame,vector<cv::Point2d> sampleVertices,Histogram& foreth,Histogram& bg)
+void UpdatingHistorgram(const Frame& curFrame,vector<cv::Point2i> sampleVertices,Histogram& foreth,Histogram& bg)
 {
     vector<Mat> channels;
     split(curFrame.img,channels);//分离色彩通道
@@ -29,4 +29,18 @@ void UpdatingHistorgram(const Frame& curFrame,vector<cv::Point2d> sampleVertices
     }
 }
 
-
+Mat VizHistImg(const Histogram& img)
+{
+    int mval = 0;
+    for (int j = 0; j < 255; ++j) {
+        mval = mval > img.B[j]? mval : img.B[j];
+    }
+    Mat histImg1 = Mat::zeros(256,400,CV_8U);
+    int height = 299;
+    for (int i = 0; i < 255; ++i) {
+        line(histImg1,{i,height},{i,height-img.B[i]*height/mval},{255,255,255});
+    }
+    imshow("hist",histImg1);
+    waitKey(0);
+    return {};
+}

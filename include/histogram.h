@@ -8,5 +8,8 @@ struct Histogram
     int B[255]{};
 };
 
-void UpdatingHistorgram(const Frame& curFrame,std::vector<cv::Point2d> sampleVertices,Histogram& foreth,Histogram& bg);
+void UpdatingHistorgram(const Frame& curFrame,std::vector<cv::Point2i> sampleVertices,Histogram& foreth,Histogram& bg);
+cv::Mat VizHistImg(const Histogram& img);
+
+
 //UpdatingHistorgramYUV(Frame curFrame,VerticesNearToContour);
