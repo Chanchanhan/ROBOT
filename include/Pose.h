@@ -6,8 +6,10 @@
 #include <opencv2/core.hpp>
 class Pose{
 public:
+    Pose();
     Pose(double data[6]);
     void getExtrinsicMat(cv::Mat &extrinsic);
+    ~Pose();
 
 private:
   Sophus::SE3d m_pose ;
