@@ -12,8 +12,8 @@ public:
 	Pose m_pose;
 	Pose gt_Pose;
 	cv::Mat segmentation;
-	std::vector<cv::Point2i> contour;
-
+	std::vector<cv::Point2d> contourX2D;
+    std::vector<cv::Point3d> contourX3D;
 	unsigned int index;
 
 	void segment();

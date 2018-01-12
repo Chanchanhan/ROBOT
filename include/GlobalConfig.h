@@ -12,6 +12,8 @@
     int IMG_PYR_NUMBER;
     int VIDEO_WIDTH;
     int VIDEO_HEIGHT;
+      float FX,FY;
+      float CX,CY;
     bool USE_VIDEO;
     bool USE_GT;
     int START_INDEX;
@@ -29,19 +31,24 @@
 
       //parameters for init
       {	
-	configInstance.USE_VIDEO = std::lround(ocvYamlConfig.value_f("USE_VIDEO"))== 1;
-	configInstance.objFile = ocvYamlConfig.text("Input.Directory.Obj");;
-	configInstance.videoPath =ocvYamlConfig.text("Input.Directory.Video");
-	configInstance.gtFile= ocvYamlConfig.text("Input.Directory.GroudTruth");
-	configInstance.DISTORTIONS= ocvYamlConfig.text("Input.Directory.DISTORTIONS");
-	configInstance.START_INDEX=std::lround(ocvYamlConfig.value_f("Init_Frame_Index"));
-	configInstance.USE_GT=std::lround(ocvYamlConfig.value_f("USE_GT_DATA"))==1;
-	configInstance.VIDEO_HEIGHT=std::lround(ocvYamlConfig.value_f("VIDEO_HEIGHT"));
-	configInstance.VIDEO_WIDTH=std::lround(ocvYamlConfig.value_f("VIDEO_WIDTH"));
+        configInstance.USE_VIDEO = std::lround(ocvYamlConfig.value_f("USE_VIDEO"))== 1;
+        configInstance.objFile = ocvYamlConfig.text("Input.Directory.Obj");;
+        configInstance.videoPath =ocvYamlConfig.text("Input.Directory.Video");
+        configInstance.gtFile= ocvYamlConfig.text("Input.Directory.GroudTruth");
+        configInstance.DISTORTIONS= ocvYamlConfig.text("Input.Directory.DISTORTIONS");
+        configInstance.START_INDEX=std::lround(ocvYamlConfig.value_f("Init_Frame_Index"));
+        configInstance.USE_GT=std::lround(ocvYamlConfig.value_f("USE_GT_DATA"))==1;
+        configInstance.VIDEO_HEIGHT=std::lround(ocvYamlConfig.value_f("VIDEO_HEIGHT"));
+          configInstance.VIDEO_WIDTH=std::lround(ocvYamlConfig.value_f("VIDEO_WIDTH"));
+          configInstance.FX= ocvYamlConfig.value_f("Calib_FX");
+          configInstance.FY= ocvYamlConfig.value_f("Calib_FY");
+          configInstance.CX = ocvYamlConfig.value_f("Calib_CX");
+          configInstance.CY= ocvYamlConfig.value_f("Calib_CY");
+
       }
       //paremeters for CV
       {
-	configInstance.CV_DRAW_FRAME=std::lround(config.value_f("CV_DRAW_FRAME"))== 1;;
+	configInstance.CV_DRAW_FRAME=std::lround(ocvYamlConfig.value_f("CV_DRAW_FRAME"))== 1;;
 
       }
       //parameters for Detect

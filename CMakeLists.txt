@@ -51,7 +51,7 @@ ADD_DEFINITIONS(/D_USE_MATH_DEFINES)
 LIST(APPEND LINK_LIBS glog::glog  ${OpenCV_LIBS} ${Sophus_LIBRARIES}  ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} )
 
 #add test unit 1
-add_executable(test-cgy TestUnits/test.cpp ${HEADERS} ${SOURCE_FILES})
+add_executable(test-cgy TestUnits/test.cpp ${HEADERS} ${SOURCE_FILES} )
 add_test(test-cgy test-cgy)
 SET_TARGET_PROPERTIES(test-cgy PROPERTIES    RUNTIME_OUTPUT_DIRECTORY  "${PROJECT_SOURCE_DIR}/bin")
 TARGET_LINK_LIBRARIES(test-cgy ${LINK_LIBS})

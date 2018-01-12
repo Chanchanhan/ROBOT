@@ -1,6 +1,9 @@
+#include <opencv2/imgproc.hpp>
+
 #include "DataPaser.h"
 #include "GlobalConfig.h"
-#include <opencv2/imgproc.hpp>
+#include "Pose.h"
+#include "frame.h"
 DataPaser::DataPaser(const int &argc,char **argv,const OcvYamlConfig& config)
 {
   Config::loadConfig(config);
@@ -30,6 +33,21 @@ DataPaser::DataPaser(const int &argc,char **argv,const OcvYamlConfig& config)
 //    LOG(INFO)<<" getPose"<<" " << gtPose[0]<<" " << gtPose[1]<<" " << gtPose[2]<<" " << gtPose[3]<<" " << gtPose[4]<<" " << gtPose[5];
     memcpy(prePose,gtPose,sizeof(float)*6);
   }
+    model.loadObj(Config::configInstance().objFile);
+}
+bool DataPaser::doTraking()
+{
+    if(Config::configInstance().USE_VIDEO){
+        doTrakingWithVideo();
+    }
+    else{
+        doTrakingWithPictures();
+    }
+    return true;
+}
+
+void DataPaser::doTrakingWithPictures() {
+
 }
 void DataPaser::doTrakingWithVideo()
 {
@@ -42,24 +60,28 @@ void DataPaser::doTrakingWithVideo()
     LOG(ERROR)<<("Cannot open camera\n");
     return ;    
   }
-    gConfig.VIDEO_WIDTH = (int)videoCapture.get(CV_CAP_PROP_FRAME_WIDTH);
-    gConfig.VIDEO_HEIGHT = (int)videoCapture.get(CV_CAP_PROP_FRAME_HEIGHT);
-  auto traker = std::make_shared<OD::Traker>(prePose,true); 
-  cv::Mat curFrame;
-  while (videoCapture.read(curFrame))
+//    gConfig.VIDEO_WIDTH = (int)videoCapture.get(CV_CAP_PROP_FRAME_WIDTH);
+//    gConfig.VIDEO_HEIGHT = (int)videoCapture.get(CV_CAP_PROP_FRAME_HEIGHT);
+//   auto traker = std::make_shared<OD::Traker>(prePose,true); 
+  Frame curFrame;
+  while (videoCapture.read(curFrame.img))
   {
-      cv::Mat frameDrawing = curFrame.clone();
-
+      cv::Mat frameDrawing = curFrame.img.clone();
+      Pose pose(prePose);
       if(!gConfig.USE_GT){
 	 
 	    
       }
+
+
+      model.displayCV(pose,cv::Scalar(255,255,0),frameDrawing);
+      model.getContourPointsAndIts3DPoints(pose,curFrame.contourX3D,curFrame.contourX2D);
       if(gConfig.CV_DRAW_FRAME){
-	imshow("mask_img",curFrame);
-	cv::waitKey(0);
+	    cv::imshow("frameDrawing",frameDrawing);
+	    cv::waitKey(0);
       }
       if(Config::configInstance().USE_GT){
-	getNextGTData(prePose);
+	    getNextGTData(prePose);
       }
     }
 }
@@ -69,7 +91,7 @@ void DataPaser::getNextGTData(float *newPose)
 	float gtPose[6]={0};
 	std::string str,filename;
 	std::getline(gtData,str) ;
-	istringstream gt_line(str);
+	std::istringstream gt_line(str);
 	gt_line>>filename;
 	int i=0;
 	for (float pos; gt_line >> pos; ++i) {        

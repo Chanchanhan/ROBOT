@@ -4,6 +4,7 @@
 #include<fstream>
 #include <opencv2/highgui.hpp>
 #include "OcvYamlConfig.h"
+#include "Model.h"
 class DataPaser{
 public:
     explicit DataPaser(const int &argc,char **argv,const OcvYamlConfig& config);
@@ -16,6 +17,7 @@ private:
   
   int starframeId;
   float prePose[6];
+    Model model;
   std::ifstream  gtData;
 private:
   void getNextGTData(float *newPose);

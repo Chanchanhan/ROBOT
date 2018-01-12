@@ -8,6 +8,8 @@ class Pose{
 public:
     Pose();
     Pose(double data[6]);
+    Pose(float data[6]);
+
     void getExtrinsicMat(cv::Mat &extrinsic);
     ~Pose();
 

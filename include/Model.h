@@ -15,10 +15,11 @@ public:
     Model(std::string model_file);
     ~Model();
 
-    void Load(const std::string& filename);
+    void loadObj(const std::string& filename);
+    void setIntrinsic();
     //cv part
-    void getContourPointsAndIts3DPoints(  Pose &pose,std::vector<cv::Point3d> &contour_Xs,std::vector<cv::Point2d> &contour_xs);
-    void DisplayCV( Pose &pose,const cv::Scalar &color, cv::Mat& frame);
+    void getContourPointsAndIts3DPoints( Pose &pose,std::vector<cv::Point3d> &contour_Xs,std::vector<cv::Point2d> &contour_xs);
+    void displayCV( Pose &pose,const cv::Scalar &color, cv::Mat& frame);
 
 private:
     void getVisualableVertices( Pose& pose, cv::Mat& vis_vertices);

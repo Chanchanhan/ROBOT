@@ -5,12 +5,12 @@
 #include "Model.h"
 #include "GlobalConfig.h"
 #include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> &contour_Xs,
                                            std::vector<cv::Point2d> &contour_xs) {
     cv::Mat visible_Xs,visible_xs;
     getVisualableVertices(pose,visible_Xs);
     project3D_2D(pose, visible_Xs, visible_xs);
-    LOG(INFO)<<"visible_Xs.size "<<visible_Xs.size();
     Config &g_Config = Config::configInstance();
     cv::Mat img1=cv::Mat::zeros(g_Config.VIDEO_HEIGHT, g_Config.VIDEO_WIDTH, CV_32SC1);
     for (int i = 0; i < visible_xs.cols; ++i) {
@@ -24,14 +24,15 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
     std::vector<std::vector<cv::Point> > contours;
 
     cv::Mat line_img = cv::Mat::zeros(g_Config.VIDEO_HEIGHT, g_Config.VIDEO_WIDTH , CV_8UC1);
-    DisplayCV(pose, cv::Scalar(255, 255, 255),line_img);
+    displayCV(pose, cv::Scalar(255, 255, 255),line_img);
     cv::findContours(line_img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
-//   cv::Mat mask_img = cv::Mat::zeros(Config::configInstance().VIDEO_HEIGHT,Config::configInstance().VIDEO_WIDTH, CV_8UC1);
-//   cv::drawContours(mask_img, contours, -1, CV_RGB(255, 255, 255), CV_FILLED);
-//   imshow("line_img",line_img);
-//   imshow("mask_img",mask_img);
-//   waitKey(0);
+   cv::Mat mask_img = cv::Mat::zeros(Config::configInstance().VIDEO_HEIGHT,Config::configInstance().VIDEO_WIDTH, CV_8UC1);
+   cv::drawContours(mask_img, contours, -1, CV_RGB(255, 255, 255), CV_FILLED);
+   // cv::imshow("line_img",line_img);
+
+    cv::imshow("mask_img",mask_img);
+    cv::waitKey(0);
     /***to map X-x***/
     if(contours.size()==0){
         return;
@@ -39,15 +40,13 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
     std::vector<cv::Point> &contour=contours[0];
     int near[9][2]={{0,0},{0,-1},{0,1},{-1,0},{1,0},{1,1},{1,-1},{-1,1},{-1,-1}};
     LOG(INFO)<<"contour.size() : "<<contour.size();
-    cv::Mat extrinsic;
-    
+    cv::Mat extrinsic(4, 4, CV_32FC1);
+    pose.getExtrinsicMat(extrinsic);
     for (int i = 0; i < contour.size(); ++i){
         for(int j=0;j<9;j++){
-// 	cv::Point cpt = contour[i];
             int value = img1.at<int>(contour[i].y+near[j][0],contour[i].x+near[j][1]);
             if (value > 0) {
-                img1.at<int>(contour[i].y+near[j][0],contour[i].x+near[j][1])=0;
-// 	  LOG(INFO)<<" value: "<<value;
+//              img1.at<int>(contour[i].y+near[j][0],contour[i].x+near[j][1])=0;
                 cv::Point3d pt3d( visible_Xs.at<float>(0, value - 1), visible_Xs.at<float>(1, value - 1),visible_Xs.at<float>(2, value - 1));
                 contour_Xs.push_back(pt3d);
                 contour_xs.push_back(X_to_x(pt3d,extrinsic));
@@ -73,7 +72,7 @@ cv::Point Model::X_to_x(const cv::Point3f &X,const cv::Mat &extrisic)
 }
 
 
-void Model::DisplayCV( Pose &pose,const cv::Scalar &color, cv::Mat& frame)
+void Model::displayCV( Pose &pose,const cv::Scalar &color, cv::Mat& frame)
 {
 	cv::Mat visualable_model_points;
 	getVisualableVertices(pose, visualable_model_points);
@@ -98,9 +97,10 @@ bool Model::pointInFrame(const cv::Point &p){
 void Model::getVisualableVertices(Pose &pose, cv::Mat& vis_vertices) {
     cv::Mat pt_in_cam(3, VerticesCount()+1, CV_32FC1);
 
-    cv::Mat extinsic(3, 4, CV_32FC1);
-    pose.getExtrinsicMat(extinsic);
-    pt_in_cam = extinsic * vertices_hom_;
+    cv::Mat extrinsic(4, 4, CV_32FC1);
+    pose.getExtrinsicMat(extrinsic);
+//    LOG(INFO)<<"extrinsic: "<<extrinsic;
+    pt_in_cam = extrinsic * vertices_hom_;
 
     float u[3], v[3], n[3], c[3];
     for (size_t i = 0; i < model_->numtriangles; i++) {
@@ -180,7 +180,7 @@ void Model::getVisualableVertices(Pose &pose, cv::Mat& vis_vertices) {
 
 void Model::project3D_2D( Pose &pose, const cv::Mat& visible_Xs,  cv::Mat &visible_xs)
 {
-    cv::Mat extrinsic ;
+    cv::Mat extrinsic(4, 4, CV_32FC1) ;
     pose.getExtrinsicMat(extrinsic);
     visible_xs=intrinsic*extrinsic*visible_Xs;
     for (int i = 0; i < visible_xs.cols; ++i) {
