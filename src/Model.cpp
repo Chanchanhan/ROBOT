@@ -1,9 +1,10 @@
 //
 // Created by qqh on 18-1-11.
 //
-
-#include "Model.h"
 #include <glog/logging.h>
+#include "Pose.h"
+#include "Model.h"
+#include "GlobalConfig.h"
 Model::Model() {
     model_ = NULL;
 }
@@ -17,6 +18,7 @@ Model::~Model() {
     if(model_)
         glmDelete(model_);
 }
+
 
 void Model::Load(const std::string& filename) {
     if (model_)
@@ -33,3 +35,4 @@ void Model::Load(const std::string& filename) {
         vertices_hom_.at<float>(3, i) = 1;
     }
 }
+

@@ -1,8 +1,9 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#include<iostream>
+#include <iostream>
 #include <string>
+#include <fstream>
 #include <glog/logging.h>
 #include "OcvYamlConfig.h"
   class Config
@@ -51,7 +52,7 @@
     private:
       static void loadFiles(){
 	std::string str;
-	std::ifstream _DISTORTIONS=std::ifstream(Config::configInstance().DISTORTIONS);    
+	std::ifstream _DISTORTIONS=std::ifstream(Config::configInstance().DISTORTIONS);
 	if(_DISTORTIONS.is_open()){
 	  std::getline(_DISTORTIONS,str) ;    
 	  std::istringstream gt_line(str);

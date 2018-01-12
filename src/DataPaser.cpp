@@ -1,4 +1,4 @@
-#include "dataPaser.h"
+#include "DataPaser.h"
 #include "GlobalConfig.h"
 DataPaser::DataPaser(const int &argc,char **argv,const OcvYamlConfig& config)
 {
@@ -26,7 +26,7 @@ DataPaser::DataPaser(const int &argc,char **argv,const OcvYamlConfig& config)
     for (float pos; gt_line >> pos; ++i) {   
 	  gtPose[i] = pos;   
     }
-    LOG(WARNING)<<" getPose"<<" " << gtPose[0]<<" " << gtPose[1]<<" " << gtPose[2]<<" " << gtPose[3]<<" " << gtPose[4]<<" " << gtPose[5];
+//    LOG(INFO)<<" getPose"<<" " << gtPose[0]<<" " << gtPose[1]<<" " << gtPose[2]<<" " << gtPose[3]<<" " << gtPose[4]<<" " << gtPose[5];
     memcpy(prePose,gtPose,sizeof(float)*6);
   }
 }
