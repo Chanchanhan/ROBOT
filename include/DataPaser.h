@@ -13,12 +13,12 @@ public:
 private:
 //   std::ifstream gtData();
 //   void doTraking_Frame(const  std::make_shared<OD::Traker> traker, const cv::Mat &frame);
-
+  
   int starframeId;
   float prePose[6];
   std::ifstream  gtData;
 private:
-  void getSextGtData(float *newPose);
+  void getNextGTData(float *newPose);
   void doTrakingWithVideo();
   void doTrakingWithPictures();
 

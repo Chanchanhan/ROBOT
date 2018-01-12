@@ -75,7 +75,6 @@ cv::Point Model::X_to_x(const cv::Point3f &X,const cv::Mat &extrisic)
 
 void Model::DisplayCV( Pose &pose,const cv::Scalar &color, cv::Mat& frame)
 {
-  
 	cv::Mat visualable_model_points;
 	getVisualableVertices(pose, visualable_model_points);
 
