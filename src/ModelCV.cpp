@@ -32,7 +32,7 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
    // cv::imshow("line_img",line_img);
 
     cv::imshow("mask_img",mask_img);
-    cv::waitKey(0);
+    cv::waitKey(1);
     /***to map X-x***/
     if(contours.size()==0){
         return;
@@ -40,7 +40,6 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
     std::vector<cv::Point> &contour=contours[0];
     resContour=contours[0];
     int near[9][2]={{0,0},{0,-1},{0,1},{-1,0},{1,0},{1,1},{1,-1},{-1,1},{-1,-1}};
-    LOG(INFO)<<"contour.size() : "<<contour.size();
     cv::Mat extrinsic(4, 4, CV_32FC1);
     pose.getExtrinsicMat(extrinsic);
     for (int i = 0; i < contour.size(); ++i){
@@ -55,6 +54,7 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
             }
         }
     }
+    LOG(INFO)<<"verticesContour_xs.size() : "<<verticesContour_xs.size();
 
 }
 

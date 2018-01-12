@@ -63,22 +63,23 @@ void DataPaser::doTrakingWithVideo()
 //    gConfig.VIDEO_WIDTH = (int)videoCapture.get(CV_CAP_PROP_FRAME_WIDTH);
 //    gConfig.VIDEO_HEIGHT = (int)videoCapture.get(CV_CAP_PROP_FRAME_HEIGHT);
 //   auto traker = std::make_shared<OD::Traker>(prePose,true); 
-  Frame curFrame;
-  while (videoCapture.read(curFrame.img))
+  cv::Mat img;
+  while (videoCapture.read(img))
   {
-      cv::Mat frameDrawing = curFrame.img.clone();
+      cv::Mat frameDrawing = img.clone();
       Pose pose(prePose);
       if(!gConfig.USE_GT){
 	 
 	    
       }
 
-
+      Frame curFrame;
+      curFrame.img=img.clone();
       model.displayCV(pose,cv::Scalar(255,255,0),frameDrawing);
       model.getContourPointsAndIts3DPoints(pose,curFrame.VerticesNear2ContourX3D,curFrame.VerticesNear2ContourX2D,curFrame.contourX2D);
       if(gConfig.CV_DRAW_FRAME){
 	    cv::imshow("frameDrawing",frameDrawing);
-	    cv::waitKey(0);
+	    cv::waitKey(1);
       }
       if(Config::configInstance().USE_GT){
 	    getNextGTData(prePose);
