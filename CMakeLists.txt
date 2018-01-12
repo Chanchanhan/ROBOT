@@ -56,7 +56,6 @@ LIST(APPEND LINK_LIBS ${GLOG_LIBRARY}  ${OpenCV_LIBS} ${Sophus_LIBRARIES}  ${OPE
 #TARGET_LINK_LIBRARIES(ROBOT ${LINK_LIBS})
 
 
-
 #add test unit 1
 add_executable(test-cgy TestUnits/test.cpp ${HEADERS} ${SOURCE_FILES})
 add_test(test-cgy test-cgy)

@@ -14,6 +14,7 @@ public:
 
 	unsigned int index;
 
+    void setContours(std::vector<cv::Point2i> contour);
 	void segment();
 };
 
