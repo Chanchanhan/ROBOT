@@ -1,24 +1,34 @@
 //
 // Created by qqh on 18-1-11.
 //
-
-#include "Model.h"
 #include <glog/logging.h>
+#include "Pose.h"
+#include "Model.h"
+#include "GlobalConfig.h"
 Model::Model() {
     model_ = NULL;
+
 }
 
 Model::Model(std::string model_file) {
     model_ = NULL;
-    Load(model_file);
+    loadObj(model_file);
 }
 
 Model::~Model() {
     if(model_)
         glmDelete(model_);
 }
+void Model::setIntrinsic() {
+    const Config &gConfig = Config::configInstance();
+    intrinsic=cv::Mat(3,4,CV_32FC1);
+    intrinsic.at<float>(0,0)=gConfig.FX;    intrinsic.at<float>(0,1)=0;             intrinsic.at<float>(0,2)=gConfig.CX; intrinsic.at<float>(0,3)=0;
+    intrinsic.at<float>(1,0)=0;             intrinsic.at<float>(1,1)=gConfig.FY;    intrinsic.at<float>(1,2)=gConfig.CY; intrinsic.at<float>(1,3)=0;
+    intrinsic.at<float>(2,0)=0;             intrinsic.at<float>(2,1)=0;             intrinsic.at<float>(2,2)=1; intrinsic.at<float>(2,3)=0;
+}
 
-void Model::Load(const std::string& filename) {
+void Model::loadObj(const std::string& filename) {
+
     if (model_)
         glmDelete(model_);
 
@@ -32,4 +42,7 @@ void Model::Load(const std::string& filename) {
         vertices_hom_.at<float>(2, i) = model_->vertices[3 * (i)+2];
         vertices_hom_.at<float>(3, i) = 1;
     }
+    setIntrinsic();
+
 }
+

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <glog/logging.h>
 
-#include "dataPaser.h"
+#include "DataPaser.h"
 int main(int argc, char* argv[]) {
 
   google::InitGoogleLogging(argv[0]);
@@ -11,6 +11,6 @@ int main(int argc, char* argv[]) {
   }
   OcvYamlConfig ocvYamlConfig(argv[1]);
   auto dataPaser = std::make_unique<DataPaser>(argc,argv,ocvYamlConfig);
-
+  dataPaser->doTraking();
   return 0;
 }
