@@ -75,7 +75,7 @@ void DataPaser::doTrakingWithVideo()
 
 
       model.displayCV(pose,cv::Scalar(255,255,0),frameDrawing);
-      model.getContourPointsAndIts3DPoints(pose,curFrame.contourX3D,curFrame.contourX2D);
+      model.getContourPointsAndIts3DPoints(pose,curFrame.VerticesNear2ContourX3D,curFrame.VerticesNear2ContourX2D,curFrame.contourX2D);
       if(gConfig.CV_DRAW_FRAME){
 	    cv::imshow("frameDrawing",frameDrawing);
 	    cv::waitKey(0);

@@ -18,7 +18,7 @@ public:
     void loadObj(const std::string& filename);
     void setIntrinsic();
     //cv part
-    void getContourPointsAndIts3DPoints( Pose &pose,std::vector<cv::Point3d> &contour_Xs,std::vector<cv::Point2d> &contour_xs);
+    void getContourPointsAndIts3DPoints( Pose &pose,std::vector<cv::Point3d> &verticesContour_Xs,std::vector<cv::Point2d> &verticesContour_xs,std::vector<cv::Point> &resContour);
     void displayCV( Pose &pose,const cv::Scalar &color, cv::Mat& frame);
 
 private:

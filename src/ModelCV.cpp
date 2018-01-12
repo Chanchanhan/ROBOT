@@ -6,8 +6,8 @@
 #include "GlobalConfig.h"
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
-void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> &contour_Xs,
-                                           std::vector<cv::Point2d> &contour_xs) {
+void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> &verticesContour_Xs,
+                                           std::vector<cv::Point2d> &verticesContour_xs,std::vector<cv::Point> &resContour) {
     cv::Mat visible_Xs,visible_xs;
     getVisualableVertices(pose,visible_Xs);
     project3D_2D(pose, visible_Xs, visible_xs);
@@ -38,6 +38,7 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
         return;
     }
     std::vector<cv::Point> &contour=contours[0];
+    resContour=contours[0];
     int near[9][2]={{0,0},{0,-1},{0,1},{-1,0},{1,0},{1,1},{1,-1},{-1,1},{-1,-1}};
     LOG(INFO)<<"contour.size() : "<<contour.size();
     cv::Mat extrinsic(4, 4, CV_32FC1);
@@ -48,8 +49,8 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
             if (value > 0) {
 //              img1.at<int>(contour[i].y+near[j][0],contour[i].x+near[j][1])=0;
                 cv::Point3d pt3d( visible_Xs.at<float>(0, value - 1), visible_Xs.at<float>(1, value - 1),visible_Xs.at<float>(2, value - 1));
-                contour_Xs.push_back(pt3d);
-                contour_xs.push_back(X_to_x(pt3d,extrinsic));
+                verticesContour_Xs.push_back(pt3d);
+                verticesContour_xs.push_back(X_to_x(pt3d,extrinsic));
                 break;
             }
         }
