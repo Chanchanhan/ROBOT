@@ -3,7 +3,7 @@
 #include "DataPaser.h"
 #include "GlobalConfig.h"
 #include "Pose.h"
-#include "frame.h"
+#include "Frame.h"
 
 using namespace std;
 

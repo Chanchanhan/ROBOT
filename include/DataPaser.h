@@ -5,7 +5,7 @@
 #include <opencv2/highgui.hpp>
 #include "OcvYamlConfig.h"
 #include "Model.h"
-#include "frame.h"
+#include "Frame.h"
 
 
 class DataPaser{

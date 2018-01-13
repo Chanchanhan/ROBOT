@@ -7,7 +7,7 @@
 #include <iostream>
 #include <opencv2/core.hpp>
 #include "./../ThirdParty/glm/glm.h"
-#include "frame.h"
+#include "Frame.h"
 
 class Pose;
 class Model {

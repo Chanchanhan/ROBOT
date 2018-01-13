@@ -1,6 +1,4 @@
 #include <iostream>
-#include "bresenhams_circle.h"
-#include "histogram.h"
 #include "Tracker.h"
 #include <glog/logging.h>
 
@@ -44,7 +42,16 @@ int main(int argc, char* argv[])
     auto dataPaser = std::make_unique<DataPaser>(ocvYamlConfig);
     Tracker tk;
     tk.init(ocvYamlConfig);
-    tk.run();
+    bool initialized = false;
+    while(1)
+    {
+        FramePtr cur_frame(new Frame);
+        if(!dataPaser->parseAFrame(cur_frame))
+            break;
+        if(!initialized)
+            cur_frame->m_pose = cur_frame->gt_Pose;
+        tk.ProcessFrame(cur_frame);
+    }
 	return 0;
 }
 

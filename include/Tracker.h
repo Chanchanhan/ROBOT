@@ -12,13 +12,14 @@
 class Tracker {
 public:
     void init(const OcvYamlConfig& ocvYamlConfig);
-    void run();
     void ProcessFrame(FramePtr f);
 
 private:
     std::unique_ptr<DataPaser> parser_;
     Model model_;
-    Pose cur_pose;
+    Pose cur_pose_;
+    FramePtr last_frame_;
+    FramePtr cur_frame_;
 };
 
 
