@@ -33,12 +33,12 @@ Mat VizHistImg(const Histogram& img)
 {
     int mval = 0;
     for (int j = 0; j < 255; ++j) {
-        mval = mval > img.B[j]? mval : img.B[j];
+        mval = mval > img.G[j]? mval : img.G[j];
     }
     Mat histImg1 = Mat::zeros(256,400,CV_8U);
     int height = 299;
     for (int i = 0; i < 255; ++i) {
-        line(histImg1,{i,height},{i,height-img.B[i]*height/mval},{255,255,255});
+        line(histImg1,{i,height},{i,height-img.G[i]*height/mval},{255,255,255});
     }
     imshow("hist",histImg1);
     waitKey(0);

@@ -2,10 +2,12 @@
 #define ROBOT_FRAME_H
 #include <opencv2/opencv.hpp>
 #include "Pose.h"
+#include <memory>
 
 class Frame
 {
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	cv::Mat img;
 	//SE3D dpose;
 	//SE3D grondTruthPose;
@@ -15,12 +17,16 @@ public:
 	std::vector<cv::Point2d> VerticesNear2ContourX2D;
     std::vector<cv::Point3d> VerticesNear2ContourX3D;
 	std::vector<cv::Point> contourX2D;
-	unsigned int index;
 
-    void setContours(std::vector<cv::Point2i> contour);
-	void segment();
+    double fw_prior;
+    double bg_prior;
+
+	unsigned int index;
+	void Segment();
+    void ComputePrior();
+
 };
 
-
+typedef std::shared_ptr<Frame> FramePtr;
 
 #endif

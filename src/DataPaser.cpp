@@ -4,36 +4,28 @@
 #include "GlobalConfig.h"
 #include "Pose.h"
 #include "frame.h"
-DataPaser::DataPaser(const int &argc,char **argv,const OcvYamlConfig& config)
+
+using namespace std;
+
+DataPaser::DataPaser(const OcvYamlConfig& config)
 {
   Config::loadConfig(config);
+
   FLAGS_log_dir=config.text("Output.Directory.LOG_DIR");     
   FLAGS_stderrthreshold = std::lround(config.value_f("LOG_Threshold"));  // INFO: 0, WARNING: 1, ERROR: 2, FATAL: 3
 
   gtData= std::ifstream(Config::configInstance().gtFile);      
-  /*** load first frame to init***/  
-  starframeId=Config::configInstance().START_INDEX;
-  int k=0;
-  {  
+      /*** load first frame to init***/
+    starframeId=Config::configInstance().START_INDEX;
+
+    int k=0;
     while(k<starframeId){
       std::string str;
       std::getline(gtData,str) ;
       k++;
-    } 
-    float gtPose[6]={0};
-    std::string str,filename;
-    std::getline(gtData,str) ;
-    
-    std::istringstream gt_line(str);
-    gt_line>>filename;
-    int i=0;
-    for (float pos; gt_line >> pos; ++i) {   
-	  gtPose[i] = pos;   
     }
-//    LOG(INFO)<<" getPose"<<" " << gtPose[0]<<" " << gtPose[1]<<" " << gtPose[2]<<" " << gtPose[3]<<" " << gtPose[4]<<" " << gtPose[5];
-    memcpy(prePose,gtPose,sizeof(float)*6);
-  }
-    model.loadObj(Config::configInstance().objFile);
+
+    videoCapture.open(Config::configInstance().videoPath);
 }
 bool DataPaser::doTraking()
 {
@@ -108,6 +100,39 @@ void DataPaser::getNextGTData(float *newPose)
 DataPaser::~DataPaser()
 {
 
+}
+
+bool DataPaser::parseAFrame(FramePtr frame) {
+    int frameId=starframeId;
+    if (!videoCapture.isOpened())
+    {
+        LOG(ERROR)<<("Cannot open camera\n");
+        return false;
+    }
+    cv::Mat img;
+    if (!videoCapture.read(img))
+        return false;
+
+    cv::Mat frameDrawing = img.clone();
+
+    float gtPose[6]={0};
+    std::string str,temp;
+    std::getline(gtData,str) ;
+
+    std::istringstream gt_line(str);
+
+    gt_line>>temp;
+    for (int j = 0; j < 6; ++j) {
+        float pos;
+        gt_line >> pos;
+        gtPose[j] = pos;
+    }
+
+    memcpy(prePose,gtPose,sizeof(float)*6);
+
+    frame->img=img.clone();
+    frame->gt_Pose = Pose(gtPose);
+    return true;
 }
 
 

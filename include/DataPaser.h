@@ -5,11 +5,15 @@
 #include <opencv2/highgui.hpp>
 #include "OcvYamlConfig.h"
 #include "Model.h"
+#include "frame.h"
+
+
 class DataPaser{
 public:
-    explicit DataPaser(const int &argc,char **argv,const OcvYamlConfig& config);
+    explicit DataPaser(const OcvYamlConfig& config);
     bool doTraking();
     bool doDetecting();
+    bool parseAFrame(FramePtr f);
     ~DataPaser();
 private:
 //   std::ifstream gtData();
@@ -23,6 +27,7 @@ private:
   void getNextGTData(float *newPose);
   void doTrakingWithVideo();
   void doTrakingWithPictures();
+    cv::VideoCapture videoCapture;
 
 };
 #endif
