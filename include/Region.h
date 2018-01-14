@@ -20,12 +20,12 @@ void BresenhamCircle(cv::Point2i veterx,int radius,std::vector<cv::Point2i>& sam
 class Region {
 public:
     Region(){};
-    Region(int r,cv::Point center);
+    Region(cv::Point center,int r);
     cv::Point center_;
     int radius_;
     Histogram bg;
     Histogram fwd;
-    void UpdatingHistorgram(const Frame& curFrame);
+    void UpdatingHistorgram(FramePtr curFrame);
     void VizHistImg(const Histogram& img);
     std::vector<cv::Point> circle_bound_;
 };

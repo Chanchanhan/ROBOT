@@ -104,18 +104,17 @@ void Region::VizHistImg(const Histogram& img)
     waitKey(0);
 }
 
-Region::Region(int r, cv::Point center) {
+Region::Region(cv::Point center,int r) {
     center_ = center;
     radius_ = r;
     BresenhamCircle(center,r,circle_bound_);
 }
 
-void Region::UpdatingHistorgram(const Frame& curFrame)
+void Region::UpdatingHistorgram(FramePtr curFrame)
 {
-    int y_max = circle_bound_.back();
 
     vector<Mat> channels;
-    split(curFrame.img,channels);//分离色彩通道
+    split(curFrame->img,channels);//分离色彩通道
 
     int i = 1;
     if(circle_bound_[0].y==circle_bound_[1].y)
@@ -123,7 +122,7 @@ void Region::UpdatingHistorgram(const Frame& curFrame)
     for (; i < channels.size()-1; i+=2) {
         auto y = circle_bound_[i].y;
         for (int x = circle_bound_[i].x; x < circle_bound_[i+1].x; ++x) {
-            if(curFrame.segmentation.at<unsigned char>())
+            if(curFrame->segmentation.at<unsigned char>())
             {
                 fwd.B[channels[0].at<unsigned char>(x,y)]++;
                 fwd.G[channels[1].at<unsigned char>(x,y)]++;
