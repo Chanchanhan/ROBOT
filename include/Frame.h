@@ -30,7 +30,6 @@ public:
 	void Segment();
 	void DTMap();
     cv::Point nearstContourP(const cv::Point &p);
-    void ComputePrior();
     void ComputePosterior(const std::vector<Region>& rg);
 };
 

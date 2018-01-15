@@ -30,15 +30,14 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
             cur_frame_->VerticesNear2ContourX2D,
             cur_frame_->contourX2D);
     cur_frame_->Segment();
-    cur_frame_->ComputePrior();
     std::vector<Region> sample_regions;
     for (auto v:cur_frame_->contourX2D) {
         sample_regions.emplace_back(v,5);
     }
     cur_frame_->ComputePosterior(sample_regions);
     last_frame_->ComputePosterior(sample_regions);
-    cur_frame_->fw_posterior = last_frame_->fw_posterior*0.8+cur_frame_->fw_posterior*0.2;
-    cur_frame_->bg_posterior = last_frame_->bg_posterior*0.9+cur_frame_->bg_posterior*0.1;
+    cur_frame_->fw_posterior = last_frame_->fw_posterior*0.9+cur_frame_->fw_posterior*0.1;
+    cur_frame_->bg_posterior = last_frame_->bg_posterior*0.8+cur_frame_->bg_posterior*0.2;
     Mat post_map = cur_frame_->fw_posterior > cur_frame_->bg_posterior;
     post_map = post_map*255;
 
@@ -47,9 +46,5 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
     imshow("initial",cur_frame_->img);
     imshow("result",post_map);
     waitKey(1);
-
-
-
-
 }
 

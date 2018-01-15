@@ -19,12 +19,6 @@ void Frame::Segment()
     cv::drawContours(this->segmentation, contours,-1, CV_RGB(255, 255, 255), CV_FILLED);
 }
 
-void Frame::ComputePrior()
-{
-    int iVal255 = countNonZero(segmentation);
-    fw_prior = iVal255*1.0/(segmentation.cols*segmentation.rows);
-    bg_prior = 1-fw_prior;
-}
 
 void Frame::DTMap() {
     vector<float> weights;
@@ -64,8 +58,11 @@ void Frame::ComputePosterior(const std::vector<Region>& rg)
                 auto& p = img.at<Vec3b>(y,x);
                 occur.at<short>(y,x)++;
                 auto ar = s.aera;
-                fw_posterior.at<double>(y,x) += s.prior_fw * (s.fwd.B[p[0]]/ar * s.fwd.G[p[1]]/ar *s.fwd.R[p[2]]/ar);
-                bg_posterior.at<double>(y,x) += s.prior_bg * (s.bg.B[p[0]]/ar * s.bg.G[p[1]]/ar *s.bg.R[p[2]]/ar);
+                auto fw_likelihood = (s.fwd.B[p[0]]/ar * s.fwd.G[p[1]]/ar *s.fwd.R[p[2]]/ar);
+                auto bg_likelihood = (s.bg.B[p[0]]/ar * s.bg.G[p[1]]/ar *s.bg.R[p[2]]/ar);
+                auto btm = s.prior_fw * fw_likelihood + s.prior_bg*bg_likelihood;
+                fw_posterior.at<double>(y,x) += fw_likelihood /btm;
+                bg_posterior.at<double>(y,x) += bg_likelihood / btm ;
             }
         }
     }
