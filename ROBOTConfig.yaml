@@ -16,10 +16,10 @@ Calib_FX: 832.560809
 Calib_FY: 832.560809
 Calib_CX: 319.5
 Calib_CY: 239.5
-Input.Directory.Obj: "/home/qqh/DataSets/cat/cat.obj"
-Input.Directory.Video: "/home/qqh/DataSets/cat/cat_video.avi"
-Input.Directory.GroudTruth: "/home/qqh/DataSets/cat/cat_gtpose.txt"
-Input.Directory.DISTORTIONS: "/home/qqh/DataSets/cat/distortions.txt"
+Input.Directory.Obj: "/Users/flamming/WorkSpace/ROBOT/data/cat/cat.obj"
+Input.Directory.Video: "/Users/flamming/WorkSpace/ROBOT/data/cat/cat_video.avi"
+Input.Directory.GroudTruth: "/Users/flamming/WorkSpace/ROBOT/data/cat/cat_gtpose.txt"
+Input.Directory.DISTORTIONS: "/Users/flamming/WorkSpace/ROBOT/data/cat/distortions.txt"
 VIDEO_WIDTH: 640
 VIDEO_HEIGHT: 480
 

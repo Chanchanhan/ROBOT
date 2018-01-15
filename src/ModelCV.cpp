@@ -6,6 +6,10 @@
 #include "GlobalConfig.h"
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+
+
+using namespace cv;
+
 void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> &verticesContour_Xs,
                                            std::vector<cv::Point2d> &verticesContour_xs,std::vector<cv::Point> &resContour) {
     cv::Mat visible_Xs,visible_xs;
@@ -190,3 +194,43 @@ void Model::project3D_2D( Pose &pose, const cv::Mat& visible_Xs,  cv::Mat &visib
         visible_xs.at<float>(1, i) *= dz;
     }
 }
+
+std::vector<cv::Point> Model::GetContourAt(Pose &pose) {
+    cv::Mat visible_Xs,visible_xs;
+    getVisualableVertices(pose,visible_Xs);
+    project3D_2D(pose, visible_Xs, visible_xs);
+    Config &g_Config = Config::configInstance();
+
+    std::vector<std::vector<cv::Point> > contours;
+
+    cv::Mat line_img = Mat::zeros(g_Config.VIDEO_HEIGHT, g_Config.VIDEO_WIDTH , CV_8UC1);
+    displayCV(pose, cv::Scalar(255, 255, 255),line_img);
+    cv::findContours(line_img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+    if(contours.empty())
+        return  {};
+    return move(contours[0]);
+}
+//
+//void Model::SampleVertex(FramePtr frame,std::vector<cv::Point3d> &verticesContour_Xs,std::vector<cv::Point2d> &verticesContour_xs)
+//{
+//
+//    auto resContour=frame->contourX2D;
+//    auto pose = frame->gt_Pose;
+//    int near[9][2]={{0,0},{0,-1},{0,1},{-1,0},{1,0},{1,1},{1,-1},{-1,1},{-1,-1}};
+//    cv::Mat extrinsic(4, 4, CV_32FC1);
+//    pose.getExtrinsicMat(extrinsic);
+//    for (int i = 0; i < resContour.size(); ++i){
+//        for(int j=0;j<9;j++){
+//            int value = img1.at<int>(resContour[i].y+near[j][0],resContour[i].x+near[j][1]);
+//            if (value > 0) {
+////              img1.at<int>(contour[i].y+near[j][0],contour[i].x+near[j][1])=0;
+//                cv::Point3d pt3d( visible_Xs.at<float>(0, value - 1), visible_Xs.at<float>(1, value - 1),visible_Xs.at<float>(2, value - 1));
+//                verticesContour_Xs.push_back(pt3d);
+//                verticesContour_xs.push_back(X_to_x(pt3d,extrinsic));
+//                break;
+//            }
+//        }
+//    }
+//    LOG(INFO)<<"verticesContour_xs.size() : "<<verticesContour_xs.size();
+//}
+

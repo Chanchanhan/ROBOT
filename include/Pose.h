@@ -6,6 +6,7 @@
 #include <opencv2/core.hpp>
 class Pose{
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Pose();
     Pose(double data[6]);
     Pose(float data[6]);

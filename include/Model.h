@@ -7,6 +7,7 @@
 #include <iostream>
 #include <opencv2/core.hpp>
 #include "./../ThirdParty/glm/glm.h"
+#include "Frame.h"
 
 class Pose;
 class Model {
@@ -19,6 +20,9 @@ public:
     void setIntrinsic();
     //cv part
     void getContourPointsAndIts3DPoints( Pose &pose,std::vector<cv::Point3d> &verticesContour_Xs,std::vector<cv::Point2d> &verticesContour_xs,std::vector<cv::Point> &resContour);
+    std::vector<cv::Point> GetContourAt(Pose &pose);
+    void SampleVertex(FramePtr frame,std::vector<cv::Point3d> &verticesContour_Xs,std::vector<cv::Point2d> &verticesContour_xs);
+
     void displayCV( Pose &pose,const cv::Scalar &color, cv::Mat& frame);
 
 private:
