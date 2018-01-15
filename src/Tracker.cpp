@@ -37,7 +37,7 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
     Mat post_map = cur_frame_->fw_posterior > cur_frame_->bg_posterior;
     post_map = post_map*255;
 
-
+    imshow("initial",cur_frame_->img);
     imshow("result",post_map);
     waitKey(1);
 
