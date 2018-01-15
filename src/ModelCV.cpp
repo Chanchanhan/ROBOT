@@ -35,8 +35,8 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
    cv::drawContours(mask_img, contours, -1, CV_RGB(255, 255, 255), CV_FILLED);
    // cv::imshow("line_img",line_img);
 
-    cv::imshow("mask_img",mask_img);
-    cv::waitKey(1);
+//    cv::imshow("mask_img",mask_img);
+//    cv::waitKey(1);
     /***to map X-x***/
     if(contours.size()==0){
         return;
@@ -58,8 +58,6 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
             }
         }
     }
-
-
     int totalN= verticesContour_xs.size();
     if(totalN<=g_Config.TK_VER_NUMBER){
         return;
@@ -80,7 +78,8 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
     }
     verticesContour_Xs = resVerticesContour_Xs;
     verticesContour_xs = resVerticesContour_xs;
-    LOG(INFO)<<"verticesContour_Xs : "<<verticesContour_Xs.size();
+    delete  randoms;
+//    LOG(INFO)<<"verticesContour_Xs : "<<verticesContour_Xs.size();
 }
 
 cv::Point Model::X_to_x(const cv::Point3f &X,const cv::Mat &extrisic)

@@ -44,7 +44,6 @@ glmMax(GLfloat a, GLfloat b)
         return b;
     return a;
 }
-
 /* glmAbs: returns the absolute value of a float */
 static GLfloat
 glmAbs(GLfloat f)
@@ -601,6 +600,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
     numvertices = numnormals = numtexcoords = 1;
     numtriangles = 0;
     material = 0;
+
     while(fscanf(file, "%s", buf) != EOF) {
         switch(buf[0]) {
             case '#':               /* comment */
@@ -614,6 +614,8 @@ glmSecondPass(GLMmodel* model, FILE* file)
                                &vertices[3 * numvertices + 0],
                                &vertices[3 * numvertices + 1],
                                &vertices[3 * numvertices + 2]);
+// 		printf("vertices%d %f %f %f\n",numvertices,vertices[3 *numvertices + 0],vertices[3 * numvertices+ 1],vertices[3 * numvertices + 2]);
+
                         numvertices++;
                         break;
                     case 'n':           /* normal */
@@ -751,6 +753,10 @@ glmSecondPass(GLMmodel* model, FILE* file)
         }
     }
 
+//    for(int i=0;i<numvertices;i++){
+//
+//      printf("vertices%d %f %f %f\n",i,model->vertices[3 * i + 0],model->vertices[3 * i + 1],model->vertices[3 * i + 2]);
+//    }
 #if 0
     /* announce the memory requirements */
   printf(" Memory: %d bytes\n",
@@ -1469,6 +1475,7 @@ glmReadOBJ(char* filename)
     /* make a first pass through the file to get a count of the number
     of vertices, normals, texcoords & triangles */
     glmFirstPass(model, file);
+//     model->printV();
 
     /* allocate memory */
     model->vertices = (GLfloat*)malloc(sizeof(GLfloat) *
@@ -1488,12 +1495,14 @@ glmReadOBJ(char* filename)
     rewind(file);
 
     glmSecondPass(model, file);
+//     model->printV();
     glmThirdPass(model);
     /* close the file */
     fclose(file);
-    glmUnitize(model);  //ÒÆµ½ÊÓµãÖÐÐÄ
+    //glmUnitize(model);  //move to center of eyes
     glmFacetNormals(model);  //¼ÆËãÃæ·¨Ïò
     glmVertexNormals(model, 90.0);
+//     model->printV();
 
     return model;
 }
