@@ -12,8 +12,9 @@
     int IMG_PYR_NUMBER;
     int VIDEO_WIDTH;
     int VIDEO_HEIGHT;
-      float FX,FY;
-      float CX,CY;
+    int TK_VER_NUMBER;
+    float FX,FY;
+    float CX,CY;
     bool USE_VIDEO;
     bool USE_GT;
     int START_INDEX;
@@ -53,6 +54,7 @@
       }
       //parameters for Detect
       {
+          configInstance.TK_VER_NUMBER=std::lround(ocvYamlConfig.value_f("TK_VER_NUMBER"));
 	configInstance.IMG_PYR_NUMBER=std::lround(ocvYamlConfig.value_f("IMG_PYR_NUMBER"));
       }
       //Load Files
