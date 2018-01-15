@@ -4,11 +4,14 @@
 #include "Pose.h"
 #include <memory>
 
+class Region;
 class Frame
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	cv::Mat img;
+    cv::Mat fw_posterior;
+    cv::Mat bg_posterior;
 	//SE3D dpose;
 	//SE3D grondTruthPose;
 	Pose m_pose;
@@ -24,7 +27,7 @@ public:
 	unsigned int index;
 	void Segment();
     void ComputePrior();
-
+    void ComputePosterior(const std::vector<Region>& rg);
 };
 
 typedef std::shared_ptr<Frame> FramePtr;

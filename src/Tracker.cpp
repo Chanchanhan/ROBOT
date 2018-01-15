@@ -7,6 +7,8 @@
 #include "Region.h"
 
 using namespace cv;
+using namespace std;
+
 void Tracker::init(const OcvYamlConfig& ocvYamlConfig) {
     model_.loadObj(Config::configInstance().objFile);
 }
@@ -29,10 +31,14 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
     vector<Region> sample_regions;
     for (auto v:cur_frame_->contourX2D) {
         sample_regions.emplace_back(v,5);
-        sample_regions.back().UpdatingHistorgram(cur_frame_);
+        sample_regions.back().UpdateHistorgram(cur_frame_);
     }
+    cur_frame_->ComputePosterior(sample_regions);
+    Mat post_map = cur_frame_->fw_posterior > cur_frame_->bg_posterior;
+    post_map = post_map*255;
 
-    imshow("result",cur_frame_->segmentation);
+
+    imshow("result",post_map);
     waitKey(1);
 
 

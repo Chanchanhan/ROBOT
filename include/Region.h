@@ -25,7 +25,11 @@ public:
     int radius_;
     Histogram bg;
     Histogram fwd;
-    void UpdatingHistorgram(FramePtr curFrame);
+    double prior_fw{};
+    double prior_bg{};
+    double aera;
+
+    void UpdateHistorgram(FramePtr curFrame);
     void VizHistImg(const Histogram& img);
     std::vector<cv::Point> circle_bound_;
 };

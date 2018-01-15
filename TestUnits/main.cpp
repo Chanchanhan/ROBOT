@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
 //    regions.push_back(region);
 //    drawContours(f.segmentation,regions,-1,cv::Scalar(255,255,255),CV_FILLED);
 //    Histogram fore,bg;
-//    UpdatingHistorgram(f,region,fore,bg);
+//    UpdateHistorgram(f,region,fore,bg);
 //    imshow("result",draw);
 //    imshow("result",f.segmentation);
 //
