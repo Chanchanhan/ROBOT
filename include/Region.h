@@ -30,6 +30,7 @@ public:
     double aera;
 
     void UpdateHistorgram(FramePtr curFrame);
+    void UpdateHistorgram(Frame* curFrame);
     void VizHistImg(const Histogram& img);
     std::vector<cv::Point> circle_bound_;
 };

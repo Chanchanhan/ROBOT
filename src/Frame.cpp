@@ -29,6 +29,7 @@ void Frame::ComputePosterior(const std::vector<Region>& rg)
     Mat occur = Mat::zeros(img.size(),CV_16S);
     for(auto s:rg)
     {
+        s.UpdateHistorgram(this);
         int i = 1;
         for (; i < s.circle_bound_.size()-1; i++) {
             int left = s.circle_bound_[i].x;
@@ -56,4 +57,5 @@ void Frame::ComputePosterior(const std::vector<Region>& rg)
         b++;
     }
 }
+
 
