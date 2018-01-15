@@ -2,7 +2,8 @@
 // Created by flamming on 2018/1/12.
 //
 #include <Frame.h>
-
+#include "GlobalConfig.h"
+#include "DT.h"
 using namespace cv;
 using namespace std;
 void Frame::Segment()
@@ -19,3 +20,21 @@ void Frame::ComputePrior() {
     bg_prior = 1-fw_prior;
 }
 
+void Frame::DTMap() {
+    vector<float> weights;
+    weights.push_back(Config::configInstance().IMG_DT_WEIGHT);
+    weights.push_back(Config::configInstance().IMG_DT_WEIGHT);
+    distanceTransform(segmentation,dt,dtLocation,weights);
+}
+cv::Point Frame::nearstContourP(const cv::Point &point) {
+    int x= point.y;
+    int y= point.x;
+    int *_locations=(int *)dtLocation.data;
+    Config &gConfig = Config::configInstance();
+
+    while(_locations[y + gConfig.VIDEO_WIDTH * x]!=x||_locations[gConfig.VIDEO_HEIGHT *gConfig.VIDEO_WIDTH+y + gConfig.VIDEO_WIDTH * x]!=y){
+        x=_locations[y + gConfig.VIDEO_WIDTH * x];
+        y=_locations[gConfig.VIDEO_HEIGHT *gConfig.VIDEO_WIDTH+y + gConfig.VIDEO_WIDTH* x];
+    }
+    return Point(y,x);
+}

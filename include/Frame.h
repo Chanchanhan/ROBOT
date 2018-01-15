@@ -14,6 +14,8 @@ public:
 	Pose m_pose;
 	Pose gt_Pose;
 	cv::Mat segmentation;
+    cv::Mat dt;
+    cv::Mat dtLocation;
 	std::vector<cv::Point2d> VerticesNear2ContourX2D;
     std::vector<cv::Point3d> VerticesNear2ContourX3D;
 	std::vector<cv::Point> contourX2D;
@@ -23,6 +25,8 @@ public:
 
 	unsigned int index;
 	void Segment();
+	void DTMap();
+    cv::Point nearstContourP(const cv::Point &p);
     void ComputePrior();
 
 };
