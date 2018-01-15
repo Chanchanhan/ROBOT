@@ -58,8 +58,29 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
             }
         }
     }
-    LOG(INFO)<<"verticesContour_xs.size() : "<<verticesContour_xs.size();
 
+
+    int totalN= verticesContour_xs.size();
+    if(totalN<=g_Config.TK_VER_NUMBER){
+        return;
+    }
+    int *randoms = new int[totalN];
+    for (int i = 0; i < totalN ; i++) {
+        randoms[i] = i ;
+    }
+    srand((int)time(0));
+    for (int i = 0; i < totalN; i++) {
+        std::swap(randoms[i], randoms[i + rand() % (totalN - i)]);
+    }
+    std::vector<cv::Point3d> resVerticesContour_Xs(g_Config.TK_VER_NUMBER);
+    std::vector<cv::Point2d> resVerticesContour_xs(g_Config.TK_VER_NUMBER);
+    for(int i=0;i<g_Config.TK_VER_NUMBER;i++){
+        resVerticesContour_Xs[i]=verticesContour_Xs[randoms[i]];
+        resVerticesContour_xs[i]=verticesContour_xs[randoms[i]];
+    }
+    verticesContour_Xs = resVerticesContour_Xs;
+    verticesContour_xs = resVerticesContour_xs;
+    LOG(INFO)<<"verticesContour_Xs : "<<verticesContour_Xs.size();
 }
 
 cv::Point Model::X_to_x(const cv::Point3f &X,const cv::Mat &extrisic)

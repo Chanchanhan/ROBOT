@@ -9,7 +9,7 @@
 3. ~~Segment the current Frame~~
 3. ~~Sample vertices near to contour.~~
 4. ~~Statistic the histogram of the region around vertices~~
-5. Compute posterior and draw statistic img.
+5. ~~Compute posterior and draw statistic img.~~
 6. Compute and optimize the enery fuction.
 
 ### Libs:

@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
         return -1;
   }
   OcvYamlConfig ocvYamlConfig(argv[1]);
-  auto dataPaser = std::make_unique<DataPaser>(argc,argv,ocvYamlConfig);
+  auto dataPaser = std::make_unique<DataPaser>(ocvYamlConfig);
   dataPaser->doTraking();
   return 0;
 }
