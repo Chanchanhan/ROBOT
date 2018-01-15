@@ -29,6 +29,7 @@ void Frame::DTMap() {
 cv::Point Frame::nearstContourP(const cv::Point &point) {
     int x= point.y;
     int y= point.x;
+
     int *_locations=(int *)dtLocation.data;
     Config &gConfig = Config::configInstance();
 

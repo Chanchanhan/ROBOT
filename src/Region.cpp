@@ -18,7 +18,7 @@ struct cmp {
         return a.x < b.x;
     }
 };
-
+// get sample set in circle with given radius
 void BresenhamCircle(Point2i veterx,int radius,vector<Point2i>& sampleset)
 {
 
@@ -117,12 +117,12 @@ void Region::UpdatingHistorgram(FramePtr curFrame)
     split(curFrame->img,channels);//分离色彩通道
 
     int i = 1;
-    if(circle_bound_[0].y==circle_bound_[1].y)
+    if(circle_bound_[0].y==circle_bound_[1].y)//why?
         i = 0;
     for (; i < channels.size()-1; i+=2) {
         auto y = circle_bound_[i].y;
         for (int x = circle_bound_[i].x; x < circle_bound_[i+1].x; ++x) {
-            if(curFrame->segmentation.at<unsigned char>())
+            if(curFrame->segmentation.at<unsigned char>())//what dose this mean?
             {
                 fwd.B[channels[0].at<unsigned char>(x,y)]++;
                 fwd.G[channels[1].at<unsigned char>(x,y)]++;
