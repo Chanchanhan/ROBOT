@@ -52,15 +52,6 @@ template<class T> T square(const T &x) {
  * which affects that position
  * n is the size of the array
  */
-float funImg(int vk,int k,float t){
-
-    const float inf = 1e20f;
-    if(vk=k){
-        return inf;
-    }
-    return t;
-
-}
 void distanceTransform1d(float *f, float *d, int *l, int n) {
 
     const float inf = 1e20f;
