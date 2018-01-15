@@ -103,7 +103,7 @@ typedef struct _GLMmodel {
  * scaling it to fit in a unit cube around the origin.  Returns the
  * scalefactor used.
  *
- * model - properly initialized GLMmodel structure 
+ * model - properly initialized GLMmodel structure
  */
 GLfloat
 glmUnitize(GLMmodel* model);
@@ -121,7 +121,7 @@ GLfloat
 glmMaxRadius(GLMmodel* model);
 
 /* glmScale: Scales a model by a given amount.
- * 
+ *
  * model - properly initialized GLMmodel structure
  * scale - scalefactor (0.5 = half as large, 2.0 = twice as large)
  */
@@ -131,8 +131,8 @@ glmScale(GLMmodel* model, GLfloat scale);
 /* glmReverseWinding: Reverse the polygon winding for all polygons in
  * this model.  Default winding is counter-clockwise.  Also changes
  * the direction of the normals.
- * 
- * model - properly initialized GLMmodel structure 
+ *
+ * model - properly initialized GLMmodel structure
  */
 GLvoid
 glmReverseWinding(GLMmodel* model);
@@ -196,10 +196,10 @@ GLvoid
 glmDelete(GLMmodel* model);
 
 /* glmReadOBJ: Reads a model description from a Wavefront .OBJ file.
- * Returns a pointer to the created glm which should be free'd with
+ * Returns a pointer to the created object which should be free'd with
  * glmDelete().
  *
- * filename - name of the file containing the Wavefront .OBJ format data.  
+ * filename - name of the file containing the Wavefront .OBJ format data.
  */
 GLMmodel*
 glmReadOBJ(char* filename);
@@ -245,7 +245,7 @@ glmDraw_wgf(GLMmodel* model, GLuint mode);
  *            GLM_FLAT    -  render with facet normals
  *            GLM_SMOOTH  -  render with vertex normals
  *            GLM_TEXTURE -  render with texture coords
- *            GLM_FLAT and GLM_SMOOTH should not both be specified.  
+ *            GLM_FLAT and GLM_SMOOTH should not both be specified.
  */
 GLuint
 glmList(GLMmodel* model, GLuint mode);

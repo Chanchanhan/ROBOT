@@ -52,9 +52,7 @@ void DataPaser::doTrakingWithVideo()
     LOG(ERROR)<<("Cannot open camera\n");
     return ;    
   }
-//    gConfig.VIDEO_WIDTH = (int)videoCapture.get(CV_CAP_PROP_FRAME_WIDTH);
-//    gConfig.VIDEO_HEIGHT = (int)videoCapture.get(CV_CAP_PROP_FRAME_HEIGHT);
-//   auto traker = std::make_shared<OD::Traker>(prePose,true); 
+    model.loadObj(gConfig.objFile);
   cv::Mat img;
   while (videoCapture.read(img))
   {
