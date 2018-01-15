@@ -26,7 +26,7 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
             cur_frame_->contourX2D);
     cur_frame_->Segment();
     cur_frame_->ComputePrior();
-    vector<Region> sample_regions;
+    std::vector<Region> sample_regions;
     for (auto v:cur_frame_->contourX2D) {
         sample_regions.emplace_back(v,5);
         sample_regions.back().UpdatingHistorgram(cur_frame_);

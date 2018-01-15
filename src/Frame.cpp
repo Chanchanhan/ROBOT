@@ -4,7 +4,7 @@
 #include <Frame.h>
 
 using namespace cv;
-
+using namespace std;
 void Frame::Segment()
 {
     vector<vector<Point> > contours;
