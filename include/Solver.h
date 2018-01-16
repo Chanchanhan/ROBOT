@@ -45,10 +45,29 @@ class CeresSolver{
         const cv::Mat bg_;
         const Sophus::Matrix3d K_;
     };
+    class QuadraticCostFunction : public ceres::SizedCostFunction<1, 1> {
+    public:
+        virtual ~QuadraticCostFunction() {}
+        virtual bool Evaluate(double const* const* parameters,
+                              double* residuals,
+                              double** jacobians) const {
+            const double x = parameters[0][0];
+            residuals[0] = 10 - x;
+
+            // Compute the Jacobian if asked for.
+            if (jacobians != NULL && jacobians[0] != NULL) {
+                jacobians[0][0] = -1;
+            }
+            return true;
+        }
+    };
+    
+
 public:
     CeresSolver();
     ~CeresSolver();
-    void SolveByNumericDiffCostFunction(Model& model, Pose& pose, FramePtr cur_frame,FramePtr last_frame , float& curEFValue );
+    void SolveByNumericDiffCostFunction(Model& model, FramePtr cur_frame,FramePtr last_frame);
+    void SolveByQuadraticCostFunction(Model& model, FramePtr cur_frame,FramePtr last_frame);
 
 
 private:

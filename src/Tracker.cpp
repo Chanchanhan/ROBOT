@@ -60,42 +60,10 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
 
 
     cur_frame_->DTMap();
-    Sophus::Matrix3d KK;
-
-    cv2eigen(model_.intrinsic,KK);
-
-    auto so3_ = last_frame_->m_pose.m_pose.so3().log();
-    Sophus::Vector3d& t3_ = last_frame_->m_pose.m_pose.translation();
-
-    double pose_initial[6] = {so3_(0),so3_(1),so3_(2),t3_(0),t3_(1),t3_(2)};
-    for (int i = 0; i < 6; ++i) {
-        cout<<pose_initial[i]<<endl;
-    }
-    ceres::Problem min_enery;
-
-//    CostFunction* cost_function =
-//            new NumericDiffCostFunction<CostFunctor, RIDDERS,1, 6>(new CostFunctor(
-//                    cur_frame_->VerticesNear2ContourX3D,
-//                    cur_frame_->fw_posterior,
-//                    cur_frame_->bg_posterior,
-//                    cur_frame_->dt,
-//                    KK
-//            ));
-//    min_enery.AddResidualBlock(cost_function, NULL, pose_initial);
-////
-//    // 求解方程!
-
-//    Solver::Summary summary;
-//    Solve(options, &min_enery, &summary);
-
-//    std::cout << summary.BriefReport() << "\n";
-    for (int i = 0; i < 6; ++i) {
-        cout<<pose_initial[i]<<endl;
-    }
 
     //that's the result we want
-    cur_frame_->m_pose = Pose(pose_initial);
-    cur_pose_ = Pose(pose_initial);
+    ceresSolver.SolveByNumericDiffCostFunction(model_,cur_frame,last_frame_);
+    cur_pose_ = Pose(cur_frame->m_pose);
     imshow("initial",cur_frame_->img);
     imshow("result",post_map);
     waitKey(1);

@@ -12,7 +12,7 @@ CeresSolver::CeresSolver() {
     options.minimizer_progress_to_stdout = true;
 }
 CeresSolver::~CeresSolver() {}
-void CeresSolver::SolveByNumericDiffCostFunction(Model& model, Pose& pose, FramePtr cur_frame,FramePtr last_frame , float& curEFValue ){
+void CeresSolver::SolveByNumericDiffCostFunction(Model& model, FramePtr cur_frame,FramePtr last_frame){
     auto so3_ = last_frame->m_pose.m_pose.so3().log();
     Sophus::Vector3d& t3_ = last_frame->m_pose.m_pose.translation();
 
@@ -31,4 +31,9 @@ void CeresSolver::SolveByNumericDiffCostFunction(Model& model, Pose& pose, Frame
                     KK
             ));
     min_enery.AddResidualBlock(cost_function, NULL, pose_initial);
+    cur_frame->m_pose = Pose(pose_initial);
+
+}
+void CeresSolver::SolveByQuadraticCostFunction(Model& model, FramePtr cur_frame,FramePtr last_frame){
+
 }
