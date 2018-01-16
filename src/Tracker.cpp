@@ -11,36 +11,6 @@ using namespace cv;
 using namespace std;
 using namespace ceres;
 
-struct CostFunctor
-{
-    CostFunctor(vector<Point3d>& X,Mat& fwd,Mat& bg,Mat& dt_map,Sophus::Matrix3d& K):X_(X),fwd_(fwd),bg_(bg),dt_map_(dt_map),K_(K) {}
-    bool operator()(const double* pose,double* residual) const
-    {
-        double E = 0;
-        auto m_pose= Sophus::SE3d(Sophus::SO3d::exp(Sophus::Vector3d(pose[0], pose[1],pose[2])),Sophus::Vector3d(pose[3],pose[4],pose[5]));
-        for(auto Xi:X_)
-        {
-            Sophus::Vector3d Xis;
-            Xis[0] = Xi.x;
-            Xis[1] = Xi.y;
-            Xis[2] = Xi.z;
-            Xis = m_pose*Xis;
-            auto x3 = K_*Xis;
-            cv::Point x(x3(0)/x3(2),x3(1)/x3(2));
-            auto Thetax = (double)(dt_map_.at<float>(x));
-            auto He = (1.0)/((1) + ceres::exp(-Thetax));
-            E+=ceres::log(He*fwd_.at<double>(x)+(1-He)*bg_.at<double>(x));
-        }
-        residual[0] = E;//ceres::exp((table[int(x[0]*10000)]))+ceres::exp(-x[1]);
-        return true;
-    }
-
-    const vector<Point3d> X_;
-    const Mat dt_map_;
-    const Mat fwd_;
-    const Mat bg_;
-    const Sophus::Matrix3d K_;
-};
 
 void Tracker::init(const OcvYamlConfig& ocvYamlConfig) {
     model_.loadObj(Config::configInstance().objFile);
@@ -103,26 +73,22 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
     }
     ceres::Problem min_enery;
 
-    CostFunction* cost_function =
-            new NumericDiffCostFunction<CostFunctor, RIDDERS,1, 6>(new CostFunctor(
-                    cur_frame_->VerticesNear2ContourX3D,
-                    cur_frame_->fw_posterior,
-                    cur_frame_->bg_posterior,
-                    cur_frame_->dt,
-                    KK
-            ));
-    min_enery.AddResidualBlock(cost_function, NULL, pose_initial);
-//
-    // 求解方程!
-    Solver::Options options;
-    options.line_search_direction_type = LBFGS;
-    options.minimizer_type = LINE_SEARCH;
-    options.linear_solver_type = ceres::CGNR;
-    options.minimizer_progress_to_stdout = true;
-    Solver::Summary summary;
-    Solve(options, &min_enery, &summary);
+//    CostFunction* cost_function =
+//            new NumericDiffCostFunction<CostFunctor, RIDDERS,1, 6>(new CostFunctor(
+//                    cur_frame_->VerticesNear2ContourX3D,
+//                    cur_frame_->fw_posterior,
+//                    cur_frame_->bg_posterior,
+//                    cur_frame_->dt,
+//                    KK
+//            ));
+//    min_enery.AddResidualBlock(cost_function, NULL, pose_initial);
+////
+//    // 求解方程!
 
-    std::cout << summary.BriefReport() << "\n";
+//    Solver::Summary summary;
+//    Solve(options, &min_enery, &summary);
+
+//    std::cout << summary.BriefReport() << "\n";
     for (int i = 0; i < 6; ++i) {
         cout<<pose_initial[i]<<endl;
     }

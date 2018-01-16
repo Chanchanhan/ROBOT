@@ -8,6 +8,7 @@
 #include <memory>
 #include "DataPaser.h"
 #include "Model.h"
+#include "Solver.h"
 
 class Tracker {
 public:
@@ -18,6 +19,7 @@ public:
 private:
     std::unique_ptr<DataPaser> parser_;
     Model model_;
+    CeresSolver ceresSolver;
     Pose cur_pose_;
     FramePtr last_frame_;
     FramePtr cur_frame_;
