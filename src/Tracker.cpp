@@ -2,35 +2,44 @@
 // Created by flamming on 2018/1/13.
 //
 #include <ceres/ceres.h>
-
+#include <opencv2/core/eigen.hpp>
 #include "Tracker.h"
 #include "GlobalConfig.h"
 #include "Region.h"
 
 using namespace cv;
 using namespace std;
+using namespace ceres;
 
-struct EneryMinimum {
-    EneryMinimum(vector<Point3d>& X,Mat& fwd,Mat& bg,Mat& dt_map)
-            : X_(X),fwd_(fwd),bg_(bg),dt_map_(dt_map) {}
-
-    template <typename T>
-    bool operator()(const T* const pose, T* residual) const {
-        // E = \sum_{x\in \Omega}{log(H_e(\Theta(x))\bar P_f(x,y)+(1-H_e(\Theta(x)))\bar P_b(x,y))}
-        // x = \pi(K(exp(\hat \epsilon)T\tilde X))
-        // \Theta x = dt_map_.at<T>()
-        // H_e (...) = sigmoid(\Ttheta)
-        //
-
+struct CostFunctor
+{
+    CostFunctor(vector<Point3d>& X,Mat& fwd,Mat& bg,Mat& dt_map,Sophus::Matrix3d& K):X_(X),fwd_(fwd),bg_(bg),dt_map_(dt_map),K_(K) {}
+    bool operator()(const double* pose,double* residual) const
+    {
+        double E = 0;
+        auto m_pose= Sophus::SE3d(Sophus::SO3d::exp(Sophus::Vector3d(pose[0], pose[1],pose[2])), Sophus::Vector3d(pose[3],pose[4],pose[5])); 
+        for(auto Xi:X_)
+        {
+            Sophus::Vector3d Xis;
+            Xis[0] = Xi.x;
+            Xis[1] = Xi.y;
+            Xis[2] = Xi.z;
+            Xis = m_pose*Xis;
+            auto x3 = K_*Xis;
+            cv::Point x(x3(0)/x3(2), x3(1)/x3(2));
+            auto Thetax = (double)(dt_map_.at<int>(x))*1.0; 
+            auto He = (1.0)/((1) + ceres::exp(-Thetax)); 
+            E+=ceres::log(He*fwd_.at<double>(x)+(1-He)*bg_.at<double>(x));
+        }
+        residual[0] = E;//ceres::exp((table[int(x[0]*10000)]))+ceres::exp(-x[1]);
         return true;
     }
 
-private:
-    // 观测值
     const vector<Point3d> X_;
     const Mat dt_map_;
     const Mat fwd_;
     const Mat bg_;
+    const Sophus::Matrix3d K_;
 };
 
 void Tracker::init(const OcvYamlConfig& ocvYamlConfig) {
@@ -65,13 +74,46 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
     Mat post_map = cur_frame_->fw_posterior > cur_frame_->bg_posterior;
     post_map = post_map*255;
 
+
+    cur_frame_->DTMap();
+    Sophus::Matrix3d KK;
+
+    cv2eigen(model_.intrinsic,KK);
+
+    auto so3_ = last_frame_->gt_Pose.m_pose.so3().log();
+    Sophus::Vector3d& t3_ = last_frame_->gt_Pose.m_pose.translation();
+
+    double pose_initial[6] = {so3_(0),so3_(1),so3_(2),t3_(0),t3_(1),t3_(2)};
+
     ceres::Problem min_enery;
+
+    CostFunction* cost_function =
+            new NumericDiffCostFunction<CostFunctor, RIDDERS,1, 6>(new CostFunctor(
+                    cur_frame_->VerticesNear2ContourX3D,
+                    cur_frame_->fw_posterior,
+                    cur_frame_->bg_posterior,
+                    cur_frame_->dt,
+                    KK
+            ));
+    min_enery.AddResidualBlock(cost_function, NULL, pose_initial);
+//
+    // 求解方程!
+    Solver::Options options;
+    options.line_search_direction_type = LBFGS;
+    options.minimizer_type = LINE_SEARCH;
+    options.linear_solver_type = ceres::CGNR;
+    options.minimizer_progress_to_stdout = true;
+    Solver::Summary summary;
+    Solve(options, &min_enery, &summary);
+
+    std::cout << summary.BriefReport() << "\n";
+
 
     //that's the result we want
     cur_frame_->m_pose = cur_frame_->gt_Pose;
     imshow("initial",cur_frame_->img);
     imshow("result",post_map);
-    waitKey(1);
+    waitKey(0);
 }
 
 
@@ -87,8 +129,8 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
 using namespace ceres;
 using namespace Sophus;
 
-struct EneryMinimum {
-	EneryMinimum(double x,double y,double fwd,double bg_)
+struct CostFunctor {
+	CostFunctor(double x,double y,double fwd,double bg_)
 		: x_(x),y_(y),fwd_(fwd) {}
 
 	template <typename T>
@@ -118,8 +160,8 @@ int main(int argc, char** argv)
 	for (int i = 0; i < 5; ++i)
 	{
 		CostFunction* cost_function =
-			new AutoDiffCostFunction<EneryMinimum, 1, 1, 1>(
-				new EneryMinimum(data[2 * i], data[2 * i + 1]));
+			new AutoDiffCostFunction<CostFunctor, 1, 1, 1>(
+				new CostFunctor(data[2 * i], data[2 * i + 1]));
 		problem.AddResidualBlock(cost_function, NULL, &m, &c);
 	}
 

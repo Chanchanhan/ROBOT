@@ -14,7 +14,6 @@ public:
     void getExtrinsicMat(cv::Mat &extrinsic);
     ~Pose();
 
-private:
   Sophus::SE3d m_pose ;
 };
 

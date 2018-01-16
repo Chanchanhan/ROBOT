@@ -24,6 +24,7 @@ public:
     void SampleVertex(FramePtr frame,std::vector<cv::Point3d> &verticesContour_Xs,std::vector<cv::Point2d> &verticesContour_xs);
 
     void displayCV( Pose &pose,const cv::Scalar &color, cv::Mat& frame);
+    cv::Mat intrinsic;
 
 private:
     void getVisualableVertices( Pose& pose, cv::Mat& vis_vertices);
@@ -44,6 +45,5 @@ private:
     }
     GLMmodel* model_;
     cv::Mat vertices_hom_;
-    cv::Mat intrinsic;
 };
 #endif //ROBOT_MODEL_H
