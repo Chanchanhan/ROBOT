@@ -18,7 +18,7 @@ void Frame::Segment()
     this->segmentation = Mat::zeros(this->img.rows,this->img.cols,CV_8U);
     this->bound_map = Mat::zeros(this->img.rows,this->img.cols,CV_32F);
     cv::drawContours(this->segmentation, contours,-1, CV_RGB(255, 255, 255), CV_FILLED);
-    cv::drawContours(this->bound_map, contours,-1, CV_RGB(255, 255, 255));
+    cv::drawContours(this->bound_map, contours,-1, CV_RGB(255, 255, 255),CV_FILLED);
 //    imshow("bound",this->bound_map);
 }
 
@@ -28,8 +28,7 @@ void Frame::DTMap() {
     weights.push_back(Config::configInstance().IMG_DT_WEIGHT);
     weights.push_back(Config::configInstance().IMG_DT_WEIGHT);
     distanceTransform(this->bound_map,dt,dtLocation,weights);/// it's wired
-    cout << dt<<endl;
-    imshow("dt",dt*255);
+    imshow("dt",dt);
 }
 cv::Point Frame::nearstContourP(const cv::Point &point) {
     int x= point.y;

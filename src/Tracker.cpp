@@ -17,7 +17,7 @@ struct CostFunctor
     bool operator()(const double* pose,double* residual) const
     {
         double E = 0;
-        auto m_pose= Sophus::SE3d(Sophus::SO3d::exp(Sophus::Vector3d(pose[0], pose[1],pose[2])), Sophus::Vector3d(pose[3],pose[4],pose[5])); 
+        auto m_pose= Sophus::SE3d(Sophus::SO3d::exp(Sophus::Vector3d(pose[0], pose[1],pose[2])),Sophus::Vector3d(pose[3],pose[4],pose[5]));
         for(auto Xi:X_)
         {
             Sophus::Vector3d Xis;
@@ -26,9 +26,9 @@ struct CostFunctor
             Xis[2] = Xi.z;
             Xis = m_pose*Xis;
             auto x3 = K_*Xis;
-            cv::Point x(x3(0)/x3(2), x3(1)/x3(2));
-            auto Thetax = (double)(dt_map_.at<int>(x))*1.0; 
-            auto He = (1.0)/((1) + ceres::exp(-Thetax)); 
+            cv::Point x(x3(0)/x3(2),x3(1)/x3(2));
+            auto Thetax = (double)(dt_map_.at<float>(x));
+            auto He = (1.0)/((1) + ceres::exp(-Thetax));
             E+=ceres::log(He*fwd_.at<double>(x)+(1-He)*bg_.at<double>(x));
         }
         residual[0] = E;//ceres::exp((table[int(x[0]*10000)]))+ceres::exp(-x[1]);
@@ -47,15 +47,13 @@ void Tracker::init(const OcvYamlConfig& ocvYamlConfig) {
 }
 
 
-
 void Tracker::ProcessFrame(FramePtr cur_frame) {
-    last_frame_ = cur_frame;
+    last_frame_ = cur_frame_;
     cur_frame_ = cur_frame;
-
     //TODO:...
-    if(last_frame_) {
-        cur_pose_ = last_frame_->gt_Pose;
-        cur_frame_->m_pose = last_frame_->gt_Pose;
+    if(last_frame_.use_count()!=0) {
+        cur_pose_ = last_frame_->m_pose;
+        cur_frame_->m_pose = last_frame_->m_pose;
     }
     //
     model_.getContourPointsAndIts3DPoints(
@@ -80,11 +78,13 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
 
     cv2eigen(model_.intrinsic,KK);
 
-    auto so3_ = last_frame_->gt_Pose.m_pose.so3().log();
-    Sophus::Vector3d& t3_ = last_frame_->gt_Pose.m_pose.translation();
+    auto so3_ = last_frame_->m_pose.m_pose.so3().log();
+    Sophus::Vector3d& t3_ = last_frame_->m_pose.m_pose.translation();
 
     double pose_initial[6] = {so3_(0),so3_(1),so3_(2),t3_(0),t3_(1),t3_(2)};
-
+    for (int i = 0; i < 6; ++i) {
+        cout<<pose_initial[i]<<endl;
+    }
     ceres::Problem min_enery;
 
     CostFunction* cost_function =
@@ -107,10 +107,13 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
     Solve(options, &min_enery, &summary);
 
     std::cout << summary.BriefReport() << "\n";
-
+//    for (int i = 0; i < 6; ++i) {
+//        cout<<pose_initial[i]<<endl;
+//    }
 
     //that's the result we want
-    cur_frame_->m_pose = cur_frame_->gt_Pose;
+    cur_frame_->m_pose = Pose(pose_initial);
+    cur_pose_ = Pose(pose_initial);
     imshow("initial",cur_frame_->img);
     imshow("result",post_map);
     waitKey(0);

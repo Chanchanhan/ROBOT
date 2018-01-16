@@ -24,8 +24,10 @@ int main(int argc, char* argv[])
         FramePtr cur_frame(new Frame);
         if(!dataPaser->parseAFrame(cur_frame))
             break;
-        if(!initialized)
+        if(!initialized) {
+            initialized = true;
             cur_frame->m_pose = cur_frame->gt_Pose;
+        }
         tk.ProcessFrame(cur_frame);
     }
 	return 0;
