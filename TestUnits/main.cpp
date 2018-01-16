@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
             break;
         if(!initialized) {
             initialized = true;
-            cur_frame->m_pose = cur_frame->gt_Pose;
+            tk.ProcessFirstFrame(cur_frame);
         }
         tk.ProcessFrame(cur_frame);
     }

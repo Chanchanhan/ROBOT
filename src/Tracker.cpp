@@ -46,6 +46,22 @@ void Tracker::init(const OcvYamlConfig& ocvYamlConfig) {
     model_.loadObj(Config::configInstance().objFile);
 }
 
+void Tracker::ProcessFirstFrame(FramePtr cur_frame)
+{
+    cur_frame_ = cur_frame;
+    cur_frame_->m_pose = cur_frame->gt_Pose;
+    model_.getContourPointsAndIts3DPoints(
+            cur_pose_,cur_frame_->VerticesNear2ContourX3D,
+            cur_frame_->VerticesNear2ContourX2D,
+            cur_frame_->contourX2D);
+    cur_frame_->Segment();
+    std::vector<Region> sample_regions;
+    for (auto v:cur_frame_->contourX2D) {
+        sample_regions.emplace_back(v,5);
+    }
+    cur_frame_->ComputePosterior(sample_regions);
+}
+
 
 void Tracker::ProcessFrame(FramePtr cur_frame) {
     last_frame_ = cur_frame_;
@@ -107,16 +123,16 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
     Solve(options, &min_enery, &summary);
 
     std::cout << summary.BriefReport() << "\n";
-//    for (int i = 0; i < 6; ++i) {
-//        cout<<pose_initial[i]<<endl;
-//    }
+    for (int i = 0; i < 6; ++i) {
+        cout<<pose_initial[i]<<endl;
+    }
 
     //that's the result we want
     cur_frame_->m_pose = Pose(pose_initial);
     cur_pose_ = Pose(pose_initial);
     imshow("initial",cur_frame_->img);
     imshow("result",post_map);
-    waitKey(0);
+    waitKey(1);
 }
 
 
