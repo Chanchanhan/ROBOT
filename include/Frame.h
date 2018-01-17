@@ -16,7 +16,8 @@ public:
 	//SE3D grondTruthPose;
 	Pose m_pose;
 	Pose gt_Pose;
-	cv::Mat segmentation;
+    cv::Mat segmentation;
+    cv::Mat bound_map;
     cv::Mat dt;
     cv::Mat dtLocation;
 	std::vector<cv::Point2d> VerticesNear2ContourX2D;

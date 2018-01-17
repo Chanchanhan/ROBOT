@@ -16,7 +16,10 @@ void Frame::Segment()
     vector<vector<Point> > contours;
     contours.push_back(this->contourX2D);
     this->segmentation = Mat::zeros(this->img.rows,this->img.cols,CV_8U);
+    this->bound_map = Mat::zeros(this->img.rows,this->img.cols,CV_32F);
     cv::drawContours(this->segmentation, contours,-1, CV_RGB(255, 255, 255), CV_FILLED);
+    cv::drawContours(this->bound_map, contours,-1, CV_RGB(255, 255, 255),CV_FILLED);
+//    imshow("bound",this->bound_map);
 }
 
 
@@ -24,7 +27,8 @@ void Frame::DTMap() {
     vector<float> weights;
     weights.push_back(Config::configInstance().IMG_DT_WEIGHT);
     weights.push_back(Config::configInstance().IMG_DT_WEIGHT);
-    distanceTransform(segmentation,dt,dtLocation,weights);
+    distanceTransform(this->bound_map,dt,dtLocation,weights);/// it's wired
+    imshow("dt",dt);
 }
 cv::Point Frame::nearstContourP(const cv::Point &point) {
     int x= point.y;
@@ -41,7 +45,6 @@ cv::Point Frame::nearstContourP(const cv::Point &point) {
 }
 void Frame::ComputePosterior(const std::vector<Region>& rg)
 {
-    int n = rg.size();
     fw_posterior = Mat::zeros(img.size(),CV_64F) ;
     bg_posterior = Mat::zeros(img.size(),CV_64F) ;
     Mat occur = Mat::zeros(img.size(),CV_16S);
@@ -69,13 +72,29 @@ void Frame::ComputePosterior(const std::vector<Region>& rg)
     auto p1 = occur.ptr<short>(0);
     auto f = fw_posterior.ptr<double>(0);
     auto b = bg_posterior.ptr<double>(0);
+    auto seg = segmentation.ptr<unsigned char>(0);
+    auto oc = occur.ptr<short>(0);
 
     for (int j = 0; j < occur.size().area(); ++j) {
-        *f/=*p1;
-        *b/=*p1;
+        if(*oc==0&&(*seg))
+        {
+            *f = 1;
+            *b = 0;
+        }
+        else if(*oc==0&&!(*seg)) {
+            *f = 0;
+            *b = 1;
+        }
+        else
+        {
+            *f /= *p1;
+            *b /= *p1;
+        }
         p1++;
         f++;
         b++;
+        seg++;
+        oc++;
     }
 }
 
