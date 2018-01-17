@@ -61,7 +61,7 @@ class CeresSolver{
             return true;
         }
     };
-    
+
 
 public:
     CeresSolver();
