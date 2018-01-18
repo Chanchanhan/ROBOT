@@ -10,6 +10,8 @@ CeresSolver::CeresSolver() {
     options.minimizer_type = ceres::LINE_SEARCH;
     options.linear_solver_type = ceres::CGNR;
     options.minimizer_progress_to_stdout = true;
+    options.max_num_iterations = 25;
+
 }
 CeresSolver::~CeresSolver() {}
 void CeresSolver::SolveByNumericDiffCostFunction(Model& model, FramePtr cur_frame,FramePtr last_frame){
@@ -42,13 +44,21 @@ void CeresSolver::SolveByCostFunctionWithJac(Model &model, FramePtr cur_frame, F
 
     ceres::Problem min_enery;
     Sophus::Matrix3d KK;
-    ceres::CostFunction* cost_function = new CostFunctionByJac( cur_frame->VerticesNear2ContourX3D,
+    cv::cv2eigen(model.intrinsic,KK);
+
+    for(auto Xi:cur_frame->VerticesNear2ContourX3D){
+        ceres::CostFunction* cost_function = new CostFunctionByJac( Xi,
                                                                     cur_frame->fw_posterior,
                                                                     cur_frame->bg_posterior,
                                                                     cur_frame->dt,
-                                                                    cur_frame->dtLocation,
                                                                     KK) ;
-    min_enery.AddResidualBlock(cost_function, NULL, pose_initial);
+        min_enery.AddResidualBlock(cost_function, NULL, pose_initial);
+
+    }
+    ceres::Solver::Summary summary;
+
+    ceres::Solve(options, &min_enery, &summary);
+
     cur_frame->m_pose = Pose(pose_initial);
 
 
