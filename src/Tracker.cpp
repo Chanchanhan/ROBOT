@@ -56,18 +56,19 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
     cur_frame_->fw_posterior = last_frame_->fw_posterior*0.9+cur_frame_->fw_posterior*0.1;
     cur_frame_->bg_posterior = last_frame_->bg_posterior*0.8+cur_frame_->bg_posterior*0.2;
     Mat post_map = cur_frame_->fw_posterior > cur_frame_->bg_posterior;
-    post_map = post_map*255;
+//    post_map = post_map*255;
 
 
     cur_frame_->DTMap();
 
     //that's the result we want
 //    ceresSolver.SolveByNumericDiffCostFunction(model_,cur_frame,last_frame_);
-    ceresSolver.SolveByCostFunctionWithJac(model_, cur_frame, last_frame_);
-    cur_pose_ = Pose(cur_frame->m_pose);
+    ceresSolver.SolveByCostFunctionWithJac(model_, cur_frame_, last_frame_);
+    cur_pose_ = Pose(cur_frame_->m_pose);
+    model_.displayCV(cur_frame_->m_pose,{0,255,0},cur_frame_->img);
 
     imshow("initial",cur_frame_->img);
-    imshow("result",post_map);
+//    imshow("result",post_map);
     waitKey(0);
 }
 

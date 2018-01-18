@@ -74,7 +74,7 @@ void Frame::ComputePosterior(const std::vector<Region>& rg)
     auto b = bg_posterior.ptr<double>(0);
     auto seg = segmentation.ptr<unsigned char>(0);
     auto oc = occur.ptr<short>(0);
-
+    double temp;
     for (int j = 0; j < occur.size().area(); ++j) {
         if(*oc==0&&(*seg))
         {
@@ -89,6 +89,10 @@ void Frame::ComputePosterior(const std::vector<Region>& rg)
         {
             *f /= *p1;
             *b /= *p1;
+            temp = *f + *b;
+            *f = *f/temp;
+            *b = *b/temp;
+
         }
         p1++;
         f++;

@@ -19,7 +19,7 @@ class Pose;
 class CeresSolver {
     struct NumericDiffCostFunctor {
 
-        NumericDiffCostFunctor(std::vector<cv::Point3d> &X, cv::Mat &fwd, cv::Mat &bg, cv::Mat &dt_map,
+        NumericDiffCostFunctor(cv::Point3d &X, cv::Mat &fwd, cv::Mat &bg, cv::Mat &dt_map,
                                Sophus::Matrix3d &K) :
                 X_(X), fwd_(fwd), bg_(bg), dt_map_(dt_map), K_(K) {}
 
@@ -27,8 +27,7 @@ class CeresSolver {
             double E = 0;
             auto m_pose = Sophus::SE3d(Sophus::SO3d::exp(Sophus::Vector3d(pose[0], pose[1], pose[2])),
                                        Sophus::Vector3d(pose[3], pose[4], pose[5]));
-            for (auto Xi:X_) {
-
+            auto Xi = X_;
                 Sophus::Vector3d Xis;
                 Xis[0] = Xi.x;
                 Xis[1] = Xi.y;
@@ -40,14 +39,13 @@ class CeresSolver {
                 auto He = (1.0) / ((1) + ceres::exp(-Thetax));
 
 
-                E += ceres::log(He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane));
-            }
+                E = -ceres::log(He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane));
             residual[0] = E;//ceres::exp((table[int(x[0]*10000)]))+ceres::exp(-x[1]);
             return true;
         }
 
 
-        const std::vector<cv::Point3d> X_;
+        const cv::Point3d X_;
         const cv::Mat dt_map_;
         const cv::Mat fwd_;
         const cv::Mat bg_;
@@ -57,14 +55,15 @@ class CeresSolver {
     class CostFunctionByJac : public ceres::SizedCostFunction<1, 6> {
 
     public:
-        CostFunctionByJac(cv::Point3d X, cv::Mat &fwd, cv::Mat &bg, cv::Mat &dt_map, Sophus::Matrix3d &K) :
+        CostFunctionByJac(cv::Point3d& X, cv::Mat &fwd, cv::Mat &bg, cv::Mat &dt_map, Sophus::Matrix3d &K) :
                 X_(X), fwd_(fwd), bg_(bg), dt_map_(dt_map), K_(K) {}
 
         virtual ~CostFunctionByJac() {}
 
-        virtual bool Evaluate(double const *const *parameters,
+        virtual bool Evaluate(double const * const *parameters,
                               double *residuals,
                               double **jacobians) const {
+
             if (!jacobians) return true;
             double *jacobian = jacobians[0];
             if (!jacobian) return true;
@@ -82,9 +81,18 @@ class CeresSolver {
             cv::Point x_plane(x3(0) / x3(2), x3(1) / x3(2));
             auto Thetax = (double) (dt_map_.at<float>(x_plane));
 
-            auto He = (1.0) / ((1) + ceres::exp(-Thetax));
+//            auto sigmoid = [](double x){1.0/(1.0+std::exp(-Thetax))};
+//            auto He = (1.0) / ((1) + ceres::exp(-Thetax));
 
-            double left = (abs(Thetax) <= 1.0f) * (fwd_.at<double>(x_plane) - bg_.at<double>(x_plane)) /
+            double He;
+            if(Thetax>4)
+                He = 1;
+            else if(Thetax>-4)
+                He = 0.5;
+            else
+                He = 0;
+
+            double left = (abs(Thetax) <= 8.0f) * (fwd_.at<double>(x_plane) - bg_.at<double>(x_plane)) /
                           (He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane));
 
             Eigen::MatrixXd j_X_Lie(2, 6);
@@ -117,10 +125,8 @@ class CeresSolver {
 
             for (int i = 0; i < 6; i++) {
                 jacobian[i] = jac(0, i);
-                std::cout<<jacobian[i]<<" ";
             }
-            std::cout<<std::endl;
-            residuals[0] = sqrt(-ceres::log(He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane))) ;
+            residuals[0] = (-ceres::log(He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane))) ;
 
             return true;
         }
