@@ -21,7 +21,7 @@ void CeresSolver::SolveByNumericDiffCostFunction(Model& model, FramePtr cur_fram
     ceres::Problem min_enery;
     Sophus::Matrix3d KK;
 
-    LOG(INFO)<<"KK = "<<KK<<std::endl;
+//  LOG(INFO)<<"KK = "<<KK<<std::endl;
     ceres::CostFunction* cost_function =
             new ceres::NumericDiffCostFunction<NumericDiffCostFunctor, ceres::RIDDERS,1, 6>(new NumericDiffCostFunctor(
                     cur_frame->VerticesNear2ContourX3D,
