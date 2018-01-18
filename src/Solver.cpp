@@ -6,9 +6,10 @@
 #include "Model.h"
 #include <opencv2/core/eigen.hpp>
 CeresSolver::CeresSolver() {
-    options.line_search_direction_type = ceres::LBFGS;
-    options.minimizer_type = ceres::LINE_SEARCH;
-    options.linear_solver_type = ceres::CGNR;
+    //options.line_search_direction_type = ceres::LBFGS;
+    options.minimizer_type = ceres::TRUST_REGION;
+   // options.linear_solver_type = ceres::CGNR;
+    options.trust_region_strategy_type = ceres::LEVENBERG_MARQUARDT;
     options.minimizer_progress_to_stdout = true;
     options.max_num_iterations = 25;
 

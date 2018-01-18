@@ -68,7 +68,7 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
 
     imshow("initial",cur_frame_->img);
     imshow("result",post_map);
-    waitKey(1);
+    waitKey(0);
 }
 
 

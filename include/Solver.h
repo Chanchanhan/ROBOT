@@ -91,9 +91,9 @@ class CeresSolver {
             Eigen::MatrixXd j_Phi_x(1, 2);
 
             Config &gConfig = Config::configInstance();
-            float _x_in_Camera = Xis[0];
-            float _y_in_Camera = Xis[1];
-            float _z_in_Camera = Xis[2];
+            double _x_in_Camera = Xis[0];
+            double _y_in_Camera = Xis[1];
+            double _z_in_Camera = Xis[2];
 
             j_X_Lie(0, 0) = gConfig.FX / _z_in_Camera;
             j_X_Lie(0, 1) = 0;
@@ -117,8 +117,11 @@ class CeresSolver {
 
             for (int i = 0; i < 6; i++) {
                 jacobian[i] = jac(0, i);
+                std::cout<<jacobian[i]<<" ";
             }
-            residuals[0] = -ceres::log(He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane));
+            std::cout<<std::endl;
+            residuals[0] = sqrt(-ceres::log(He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane))) ;
+
             return true;
         }
 
