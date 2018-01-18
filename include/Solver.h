@@ -51,14 +51,18 @@ class CeresSolver{
         const cv::Mat bg_;
         const Sophus::Matrix3d K_;
     };
-    class QuadraticCostFunction : public ceres::SizedCostFunction<1, 1> {
+    class CostFunctionByJac : public ceres::SizedCostFunction<1, 6> {
+
     public:
-        virtual ~QuadraticCostFunction(std::vector<cv::Point3d>& X,cv::Mat& fwd,cv::Mat& bg,cv::Mat& dt_map,cv::Mat& dt_location,Sophus::Matrix3d& K):
+        CostFunctionByJac(std::vector<cv::Point3d>& X,cv::Mat& fwd,cv::Mat& bg,cv::Mat& dt_map,cv::Mat& dt_location,Sophus::Matrix3d& K):
                 X_(X),fwd_(fwd),bg_(bg),dt_map_(dt_map),dt_location_(dt_location),K_(K) {}
+        virtual ~CostFunctionByJac() {}
         virtual bool Evaluate(double const* const* parameters,
                               double* residuals,
                               double** jacobians) const {
-
+            if (!jacobians) return true;
+            double* jacobian = jacobians[0];
+            if (!jacobian) return true;
             const double *pose = parameters[0];
             auto m_pose= Sophus::SE3d(Sophus::SO3d::exp(Sophus::Vector3d(pose[0], pose[1],pose[2])),Sophus::Vector3d(pose[3],pose[4],pose[5]));
             double E = 0;
@@ -115,9 +119,7 @@ class CeresSolver{
                 j_Phi_x(0,2)=2*(x_plane.x - x_in_Contour);
                 j_Phi_x(0,2)=2*(x_plane.y - y_in_Contour);
                 Eigen::MatrixXd jac = left*j_Phi_x*j_X_Lie;
-                if (!jacobians) return true;
-                double* jacobian = jacobians[0];
-                if (!jacobian) return true;
+
                 for(int i=0;i<6;i++){
                     jacobian[i]+=jac(0,i);
                 }
@@ -146,7 +148,7 @@ public:
     CeresSolver();
     ~CeresSolver();
     void SolveByNumericDiffCostFunction(Model& model, FramePtr cur_frame,FramePtr last_frame);
-    void SolveByQuadraticCostFunction(Model& model, FramePtr cur_frame,FramePtr last_frame);
+    void SolveByCostFunctionWithJac(Model &model, FramePtr cur_frame, FramePtr last_frame);
 
 
 private:

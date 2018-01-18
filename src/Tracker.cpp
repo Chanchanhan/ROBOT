@@ -62,8 +62,10 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
     cur_frame_->DTMap();
 
     //that's the result we want
-    ceresSolver.SolveByNumericDiffCostFunction(model_,cur_frame,last_frame_);
+//    ceresSolver.SolveByNumericDiffCostFunction(model_,cur_frame,last_frame_);
+    ceresSolver.SolveByCostFunctionWithJac(model_, cur_frame, last_frame_);
     cur_pose_ = Pose(cur_frame->m_pose);
+
     imshow("initial",cur_frame_->img);
     imshow("result",post_map);
     waitKey(1);

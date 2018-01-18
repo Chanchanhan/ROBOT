@@ -34,6 +34,22 @@ void CeresSolver::SolveByNumericDiffCostFunction(Model& model, FramePtr cur_fram
     cur_frame->m_pose = Pose(pose_initial);
 
 }
-void CeresSolver::SolveByQuadraticCostFunction(Model& model, FramePtr cur_frame,FramePtr last_frame){
+void CeresSolver::SolveByCostFunctionWithJac(Model &model, FramePtr cur_frame, FramePtr last_frame){
+    auto so3_ = last_frame->m_pose.m_pose.so3().log();
+    Sophus::Vector3d& t3_ = last_frame->m_pose.m_pose.translation();
+
+    double pose_initial[6] = {so3_(0),so3_(1),so3_(2),t3_(0),t3_(1),t3_(2)};
+
+    ceres::Problem min_enery;
+    Sophus::Matrix3d KK;
+    ceres::CostFunction* cost_function = new CostFunctionByJac( cur_frame->VerticesNear2ContourX3D,
+                                                                    cur_frame->fw_posterior,
+                                                                    cur_frame->bg_posterior,
+                                                                    cur_frame->dt,
+                                                                    cur_frame->dtLocation,
+                                                                    KK) ;
+    min_enery.AddResidualBlock(cost_function, NULL, pose_initial);
+    cur_frame->m_pose = Pose(pose_initial);
+
 
 }
