@@ -80,23 +80,23 @@ class CeresSolver{
                 auto Thetax = (double)(dt_map_.at<float>(x_plane));
 
                 auto He = (1.0)/((1) + ceres::exp(-Thetax));
-                E+=ceres::log(He*fwd_.at<double>(x_plane)+(1-He)*bg_.at<double>(x_plane));
+                E+= -ceres::log(He*fwd_.at<double>(x_plane)+(1-He)*bg_.at<double>(x_plane));
 
                 double left =  (abs(Thetax)<=1.0f)*(fwd_.at<double>(x_plane)-bg_.at<double>(x_plane))/(He*fwd_.at<double>(x_plane)+(1-He)*bg_.at<double>(x_plane));
 
                 Eigen::MatrixXd j_X_Lie(2,6);
                 Eigen::MatrixXd j_Phi_x(1,2);
 
-
-                int x_in_Contour= x_plane.y;
-                int y_in_Contour= x_plane.x;
                 int *_locations=(int *)dt_location_.data;
                 Config &gConfig = Config::configInstance();
-
-                while(_locations[y_in_Contour + gConfig.VIDEO_WIDTH * x_in_Contour]!=x_in_Contour||_locations[gConfig.VIDEO_HEIGHT *gConfig.VIDEO_WIDTH+y_in_Contour + gConfig.VIDEO_WIDTH * x_in_Contour]!=y_in_Contour){
-                    x_in_Contour=_locations[y_in_Contour + gConfig.VIDEO_WIDTH * x_in_Contour];
-                    y_in_Contour=_locations[gConfig.VIDEO_HEIGHT *gConfig.VIDEO_WIDTH+y_in_Contour + gConfig.VIDEO_WIDTH* x_in_Contour];
-                }
+//                int x_in_Contour= x_plane.y;
+//                int y_in_Contour= x_plane.x;
+//
+//
+//                while(_locations[y_in_Contour + gConfig.VIDEO_WIDTH * x_in_Contour]!=x_in_Contour||_locations[gConfig.VIDEO_HEIGHT *gConfig.VIDEO_WIDTH+y_in_Contour + gConfig.VIDEO_WIDTH * x_in_Contour]!=y_in_Contour){
+//                    x_in_Contour=_locations[y_in_Contour + gConfig.VIDEO_WIDTH * x_in_Contour];
+//                    y_in_Contour=_locations[gConfig.VIDEO_HEIGHT *gConfig.VIDEO_WIDTH+y_in_Contour + gConfig.VIDEO_WIDTH* x_in_Contour];
+//                }
 
                 float _x_in_Camera=Xis[0];
                 float _y_in_Camera=Xis[1];
@@ -116,8 +116,8 @@ class CeresSolver{
                 j_X_Lie(1,4)=-gConfig.FY*_x_in_Camera*_y_in_Camera/(_z_in_Camera*_z_in_Camera);
                 j_X_Lie(1,5)=gConfig.FY*_x_in_Camera/_z_in_Camera;
 
-                j_Phi_x(0,2)=2*(x_plane.x - x_in_Contour);
-                j_Phi_x(0,2)=2*(x_plane.y - y_in_Contour);
+                j_Phi_x(0,0)=0.5f*(dt_map_.at<float>(cv::Point(x_plane.x+1,x_plane.y))-dt_map_.at<float>(cv::Point(x_plane.x-1,x_plane.y)));
+                j_Phi_x(0,1)=0.5f*(dt_map_.at<float>(cv::Point(x_plane.x,x_plane.y+1))-dt_map_.at<float>(cv::Point(x_plane.x,x_plane.y-1)));
                 Eigen::MatrixXd jac = left*j_Phi_x*j_X_Lie;
 
                 for(int i=0;i<6;i++){
