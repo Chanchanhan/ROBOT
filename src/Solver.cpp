@@ -54,8 +54,9 @@ void CeresSolver::SolveByCostFunctionWithJac(Model &model, FramePtr cur_frame, F
             KK(i,j) = model.intrinsic.at<float>(i,j);
         }
     }
+    double last = 1000000;
 //    std::cout<<pose_var<<std::endl;
-    for (int ii = 0; ii < 25; ++ii) {
+    for (int ii = 0; ii < 20; ++ii) {
 
         double r_sum = 0;
     //    double* jacobians =  new double[6];
@@ -90,15 +91,19 @@ void CeresSolver::SolveByCostFunctionWithJac(Model &model, FramePtr cur_frame, F
             r_sum += r;
         }
         std::cout<<r_sum<<std::endl;
-
-
+//        if(r_sum>last)
+//            break;
+        last = r_sum;
     //    ceres::Solver::Summary summary;
 
 
     //    ceres::Solve(options, &min_enery, &summary);
 //        std::cout<<cur_frame->m_pose.m_pose.log()<<std::endl;
-
-        cur_frame->m_pose.m_pose = Sophus::SE3d::exp(5*jtjsum.inverse()*j) * cur_frame->m_pose.m_pose;
+        Sophus::Vector6d v6d =  jtjsum.inverse()*j;
+        Sophus::Vector6d invv6d;
+//        std::cout<<v6d<<std::endl;
+        invv6d<<v6d(3),v6d(4),v6d(5)  ,v6d(0),v6d(1),v6d(2);
+        cur_frame->m_pose.m_pose = Sophus::SE3d::exp(invv6d) * cur_frame->m_pose.m_pose;
         auto so3_t = cur_frame->m_pose.m_pose.so3().log();
         Sophus::Vector3d& t3_t = cur_frame->m_pose.m_pose.translation();
 

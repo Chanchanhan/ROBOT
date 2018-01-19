@@ -25,9 +25,11 @@ void Tracker::ProcessFirstFrame(FramePtr cur_frame)
             cur_frame_->VerticesNear2ContourX2D,
             cur_frame_->contourX2D);
     cur_frame_->Segment();
+    cur_frame_->DTMap();
+
     std::vector<Region> sample_regions;
     for (auto v:cur_frame_->contourX2D) {
-        sample_regions.emplace_back(v,5);
+        sample_regions.emplace_back(v,10);
     }
     cur_frame_->ComputePosterior(sample_regions);
 }
@@ -42,6 +44,8 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         cur_frame_->m_pose = last_frame_->m_pose;
     }
     //
+//    cur_frame_->m_pose = cur_frame_->gt_Pose;
+
     model_.getContourPointsAndIts3DPoints(
             cur_pose_,cur_frame_->VerticesNear2ContourX3D,
             cur_frame_->VerticesNear2ContourX2D,
@@ -49,10 +53,10 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
     cur_frame_->Segment();
     std::vector<Region> sample_regions;
     for (auto v:cur_frame_->contourX2D) {
-        sample_regions.emplace_back(v,5);
+        sample_regions.emplace_back(v,10);
     }
-    cur_frame_->ComputePosterior(sample_regions);
     last_frame_->ComputePosterior(sample_regions);
+    cur_frame_->ComputePosterior(sample_regions);
     cur_frame_->fw_posterior = last_frame_->fw_posterior*0.9+cur_frame_->fw_posterior*0.1;
     cur_frame_->bg_posterior = last_frame_->bg_posterior*0.8+cur_frame_->bg_posterior*0.2;
     Mat post_map = cur_frame_->fw_posterior > cur_frame_->bg_posterior;
@@ -63,12 +67,12 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
 
     //that's the result we want
 //    ceresSolver.SolveByNumericDiffCostFunction(model_,cur_frame,last_frame_);
-    ceresSolver.SolveByCostFunctionWithJac(model_, cur_frame_, last_frame_);
+//    ceresSolver.SolveByCostFunctionWithJac(model_, cur_frame_, last_frame_);
     cur_pose_ = Pose(cur_frame_->m_pose);
-    model_.displayCV(cur_frame_->m_pose,{0,255,0},cur_frame_->img);
-
-    imshow("initial",cur_frame_->img);
-//    imshow("result",post_map);
+    Mat out = cur_frame_->img.clone();
+    model_.displayCV(cur_frame_->m_pose,{0,255,0},out);
+    imshow("initial",out);
+    imshow("result",post_map);
     waitKey(0);
 }
 

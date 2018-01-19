@@ -66,7 +66,7 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
     for (int i = 0; i < totalN ; i++) {
         randoms[i] = i ;
     }
-    srand((int)time(0));
+//    srand((int)time(0));
     for (int i = 0; i < totalN; i++) {
         std::swap(randoms[i], randoms[i + rand() % (totalN - i)]);
     }

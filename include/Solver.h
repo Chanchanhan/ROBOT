@@ -77,7 +77,7 @@ class CeresSolver {
             Xis[2] = X_.z;
 
             Sophus::Vector3d X_Camera_coord = m_pose * Xis;
-            auto x3 = K_ * X_Camera_coord;
+            Sophus::Vector3d x3 = K_ * X_Camera_coord;
             cv::Point x_plane(x3(0) / x3(2), x3(1) / x3(2));
             auto Thetax = (double) (dt_map_.at<float>(x_plane));
 
@@ -85,9 +85,9 @@ class CeresSolver {
 //            auto He = (1.0) / ((1) + ceres::exp(-Thetax));
 
             double He;
-            if(Thetax>4)
+            if(Thetax>8)
                 He = 1;
-            else if(Thetax>-4)
+            else if(Thetax>-8)
                 He = 0.5;
             else
                 He = 0;
@@ -95,27 +95,35 @@ class CeresSolver {
             double left = (abs(Thetax) <= 8.0f) * (fwd_.at<double>(x_plane) - bg_.at<double>(x_plane)) /
                           (He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane));
 
+
             Eigen::MatrixXd j_X_Lie(2, 6);
             Eigen::MatrixXd j_Phi_x(1, 2);
 
             Config &gConfig = Config::configInstance();
-            double _x_in_Camera = Xis[0];
-            double _y_in_Camera = Xis[1];
-            double _z_in_Camera = Xis[2];
+            double _x_in_Camera = X_Camera_coord[0];
+            double _y_in_Camera = X_Camera_coord[1];
+            double _z_in_Camera = X_Camera_coord[2];
+            if(!fabs((He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane))>0.1)) {
+                _x_in_Camera = 1;
+                std::cout<<x_plane<<std::endl;
+                std::cout<<bg_.at<double>(x_plane)<<std::endl;
+                std::cout<<fwd_.at<double>(x_plane)<<std::endl;
+            }
+            assert(fabs((He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane)))>0.001);
 
-            j_X_Lie(0, 0) = gConfig.FX / _z_in_Camera;
-            j_X_Lie(0, 1) = 0;
-            j_X_Lie(0, 2) = -gConfig.FX * _x_in_Camera / (_z_in_Camera * _z_in_Camera);
-            j_X_Lie(0, 3) = -gConfig.FX * _x_in_Camera * _y_in_Camera / (_z_in_Camera * _z_in_Camera);
-            j_X_Lie(0, 4) = gConfig.FX * (1 + _x_in_Camera * _x_in_Camera / (_z_in_Camera * _z_in_Camera));
-            j_X_Lie(0, 5) = gConfig.FX * _y_in_Camera / _z_in_Camera;
+            j_X_Lie(0, 3) = gConfig.FX / _z_in_Camera;
+            j_X_Lie(0, 4) = 0;
+            j_X_Lie(0, 5) = -gConfig.FX * _x_in_Camera / (_z_in_Camera * _z_in_Camera);
+            j_X_Lie(0, 0) = -gConfig.FX * _x_in_Camera * _y_in_Camera / (_z_in_Camera * _z_in_Camera);
+            j_X_Lie(0, 1) = gConfig.FX * (1 + _x_in_Camera * _x_in_Camera / (_z_in_Camera * _z_in_Camera));
+            j_X_Lie(0, 2) = gConfig.FX * _y_in_Camera / _z_in_Camera;
 
-            j_X_Lie(1, 0) = 0;
-            j_X_Lie(1, 1) = gConfig.FY / _z_in_Camera;
-            j_X_Lie(1, 2) = -gConfig.FY * _y_in_Camera / (_z_in_Camera * _z_in_Camera);
-            j_X_Lie(1, 3) = -gConfig.FY * (1 + _y_in_Camera * _y_in_Camera * (1 / (_z_in_Camera * _z_in_Camera)));
-            j_X_Lie(1, 4) = -gConfig.FY * _x_in_Camera * _y_in_Camera / (_z_in_Camera * _z_in_Camera);
-            j_X_Lie(1, 5) = gConfig.FY * _x_in_Camera / _z_in_Camera;
+            j_X_Lie(1, 3) = 0;
+            j_X_Lie(1, 4) = gConfig.FY / _z_in_Camera;
+            j_X_Lie(1, 5) = -gConfig.FY * _y_in_Camera / (_z_in_Camera * _z_in_Camera);
+            j_X_Lie(1, 0) = -gConfig.FY * (1 + _y_in_Camera * _y_in_Camera * (1 / (_z_in_Camera * _z_in_Camera)));
+            j_X_Lie(1, 1) = -gConfig.FY * _x_in_Camera * _y_in_Camera / (_z_in_Camera * _z_in_Camera);
+            j_X_Lie(1, 2) = gConfig.FY * _x_in_Camera / _z_in_Camera;
 
             j_Phi_x(0, 0) = 0.5f * (dt_map_.at<float>(cv::Point(x_plane.x + 1, x_plane.y)) -
                                     dt_map_.at<float>(cv::Point(x_plane.x - 1, x_plane.y)));
@@ -127,7 +135,6 @@ class CeresSolver {
                 jacobian[i] = jac(0, i);
             }
             residuals[0] = (-ceres::log(He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane))) ;
-
             return true;
         }
 

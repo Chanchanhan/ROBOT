@@ -130,23 +130,23 @@ void Region::UpdateHistorgram(FramePtr curFrame)
         {
             if(curFrame->segmentation.at<unsigned char>(y,x))
             {
-                prior_fw++;
+                n_fw++;
                 fwd.B[img.at<Vec3b>(y,x)[0]]++;
                 fwd.G[img.at<Vec3b>(y,x)[1]]++;
                 fwd.R[img.at<Vec3b>(y,x)[2]]++;
             }
             else
             {
-                prior_bg++;
+                n_bg++;
                 bg.B[img.at<Vec3b>(y,x)[0]]++;
                 bg.G[img.at<Vec3b>(y,x)[1]]++;
                 bg.R[img.at<Vec3b>(y,x)[2]]++;
             }
         }
     }
-    aera = prior_fw+prior_bg;
-    prior_fw/=aera;
-    prior_bg/=aera;
+    aera = n_fw+n_bg;
+    n_fw/=aera;
+    n_bg/=aera;
 }
 
 void Region::UpdateHistorgram(Frame* curFrame)
@@ -158,11 +158,11 @@ void Region::UpdateHistorgram(Frame* curFrame)
     fill(bg.B,bg.B+255,1);
     fill(bg.G,bg.G+255,1);
     fill(bg.R,bg.R+255,1);
-    int i = 1;
 
 
 
-    for (; i < circle_bound_.size()-1; i++) {
+
+    for (int i = 0; i < circle_bound_.size()-1; i++) {
         int left = circle_bound_[i].x;
         while(circle_bound_[i+1].y == circle_bound_[i].y)
             i++;
@@ -171,21 +171,21 @@ void Region::UpdateHistorgram(Frame* curFrame)
         {
             if(curFrame->segmentation.at<unsigned char>(y,x))
             {
-                prior_fw++;
+                n_fw++;
                 fwd.B[img.at<Vec3b>(y,x)[0]]++;
                 fwd.G[img.at<Vec3b>(y,x)[1]]++;
                 fwd.R[img.at<Vec3b>(y,x)[2]]++;
             }
             else
             {
-                prior_bg++;
+                n_bg++;
                 bg.B[img.at<Vec3b>(y,x)[0]]++;
                 bg.G[img.at<Vec3b>(y,x)[1]]++;
                 bg.R[img.at<Vec3b>(y,x)[2]]++;
             }
         }
     }
-    aera = prior_fw+prior_bg;
-    prior_fw/=aera;
-    prior_bg/=aera;
+    aera = n_fw+n_bg;
+//    prior_fw/=aera;
+//    n_bg/=aera;
 }

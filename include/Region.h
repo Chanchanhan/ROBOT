@@ -13,6 +13,16 @@ struct Histogram
     int R[255]{};
     int G[255]{};
     int B[255]{};
+    Histogram operator+(const Histogram& other)
+    {
+        Histogram r;
+        for (int i = 0; i < 255; ++i) {
+            r.B[i] = this->B[i]+other.B[i];
+            r.G[i] = this->G[i]+other.G[i];
+            r.R[i] = this->R[i]+other.R[i];
+        }
+        return r;
+    }
 };
 
 void BresenhamCircle(cv::Point2i veterx,int radius,std::vector<cv::Point2i>& sampleset);
@@ -25,9 +35,10 @@ public:
     int radius_;
     Histogram bg;
     Histogram fwd;
-    double prior_fw{};
-    double prior_bg{};
+    double n_fw{};
+    double n_bg{};
     double aera;
+
 
     void UpdateHistorgram(FramePtr curFrame);
     void UpdateHistorgram(Frame* curFrame);
