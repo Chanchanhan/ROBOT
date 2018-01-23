@@ -10,7 +10,7 @@
 
 using namespace cv;
 
-void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> &verticesContour_Xs,
+void Model::getContourPointsAndIts3DPoints(Sophus::SE3d &pose, std::vector<cv::Point3d> &verticesContour_Xs,
                                            std::vector<cv::Point2d> &verticesContour_xs,std::vector<cv::Point> &resContour) {
     cv::Mat visible_Xs,visible_xs;
     getVisualableVertices(pose,visible_Xs);
@@ -45,7 +45,7 @@ void Model::getContourPointsAndIts3DPoints(Pose &pose, std::vector<cv::Point3d> 
     resContour=contours[0];
     int near[9][2]={{0,0},{0,-1},{0,1},{-1,0},{1,0},{1,1},{1,-1},{-1,1},{-1,-1}};
     cv::Mat extrinsic(4, 4, CV_32FC1);
-    pose.getExtrinsicMat(extrinsic);
+    extrinsic = Se2cvf(pose);
     for (int i = 0; i < contour.size(); ++i){
         for(int j=0;j<9;j++){
             int value = img1.at<int>(contour[i].y+near[j][0],contour[i].x+near[j][1]);
@@ -97,7 +97,7 @@ cv::Point Model::X_to_x(const cv::Point3f &X,const cv::Mat &extrisic)
 }
 
 
-void Model::displayCV( Pose &pose,const cv::Scalar &color, cv::Mat& frame)
+void Model::displayCV( Sophus::SE3d &pose,const cv::Scalar &color, cv::Mat& frame)
 {
 	cv::Mat visualable_model_points;
 	getVisualableVertices(pose, visualable_model_points);
@@ -119,11 +119,11 @@ bool Model::pointInFrame(const cv::Point &p){
  Config &gConfig = Config::configInstance();
  return(p.x>=0&&p.y>=0&&p.x<gConfig.VIDEO_WIDTH&&p.y<gConfig.VIDEO_HEIGHT);
 }
-void Model::getVisualableVertices(Pose &pose, cv::Mat& vis_vertices) {
+void Model::getVisualableVertices(Sophus::SE3d &pose, cv::Mat& vis_vertices) {
     cv::Mat pt_in_cam(3, VerticesCount()+1, CV_32FC1);
 
     cv::Mat extrinsic(4, 4, CV_32FC1);
-    pose.getExtrinsicMat(extrinsic);
+    extrinsic = Se2cvf(pose);
 //    LOG(INFO)<<"extrinsic: "<<extrinsic;
     pt_in_cam = extrinsic * vertices_hom_;
 
@@ -203,10 +203,10 @@ void Model::getVisualableVertices(Pose &pose, cv::Mat& vis_vertices) {
 }
 
 
-void Model::project3D_2D( Pose &pose, const cv::Mat& visible_Xs,  cv::Mat &visible_xs)
+void Model::project3D_2D( Sophus::SE3d &pose, const cv::Mat& visible_Xs,  cv::Mat &visible_xs)
 {
-    cv::Mat extrinsic(4, 4, CV_32FC1) ;
-    pose.getExtrinsicMat(extrinsic);
+    cv::Mat extrinsic = Se2cvf(pose);
+    std::cout<<extrinsic<<std::endl;
     visible_xs=intrinsic*extrinsic*visible_Xs;
     for (int i = 0; i < visible_xs.cols; ++i) {
         float dz = 1.0f/visible_xs.at<float>(2, i);
@@ -215,7 +215,7 @@ void Model::project3D_2D( Pose &pose, const cv::Mat& visible_Xs,  cv::Mat &visib
     }
 }
 
-std::vector<cv::Point> Model::GetContourAt(Pose &pose) {
+std::vector<cv::Point> Model::GetContourAt(Sophus::SE3d &pose) {
     cv::Mat visible_Xs,visible_xs;
     getVisualableVertices(pose,visible_Xs);
     project3D_2D(pose, visible_Xs, visible_xs);

@@ -9,7 +9,6 @@
 #include "./../ThirdParty/glm/glm.h"
 #include "Frame.h"
 
-class Pose;
 class Model {
 public:
     Model();
@@ -19,16 +18,17 @@ public:
     void loadObj(const std::string& filename);
     void setIntrinsic();
     //cv part
-    void getContourPointsAndIts3DPoints( Pose &pose,std::vector<cv::Point3d> &verticesContour_Xs,std::vector<cv::Point2d> &verticesContour_xs,std::vector<cv::Point> &resContour);
-    std::vector<cv::Point> GetContourAt(Pose &pose);
+    void getContourPointsAndIts3DPoints( Sophus::SE3d &pose,std::vector<cv::Point3d> &verticesContour_Xs,
+                                         std::vector<cv::Point2d> &verticesContour_xs,std::vector<cv::Point> &resContour);
+    std::vector<cv::Point> GetContourAt(Sophus::SE3d &pose);
     void SampleVertex(FramePtr frame,std::vector<cv::Point3d> &verticesContour_Xs,std::vector<cv::Point2d> &verticesContour_xs);
 
-    void displayCV( Pose &pose,const cv::Scalar &color, cv::Mat& frame);
+    void displayCV( Sophus::SE3d &pose,const cv::Scalar &color, cv::Mat& frame);
     cv::Mat intrinsic;
 
 private:
-    void getVisualableVertices( Pose& pose, cv::Mat& vis_vertices);
-    void project3D_2D( Pose &pose, const cv::Mat& visible_Xs,  cv::Mat &visible_xs);
+    void getVisualableVertices( Sophus::SE3d& pose, cv::Mat& vis_vertices);
+    void project3D_2D( Sophus::SE3d &pose, const cv::Mat& visible_Xs,  cv::Mat &visible_xs);
     bool pointInFrame(const cv::Point &p);
     cv::Point X_to_x(const cv::Point3f &X,const cv::Mat &extrisic);
     int VerticesCount() {return model_->numvertices;}

@@ -13,9 +13,6 @@
 
 class Model;
 
-class Pose;
-
-
 class CeresSolver {
     struct NumericDiffCostFunctor {
 

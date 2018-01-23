@@ -16,8 +16,8 @@ CeresSolver::CeresSolver() {
 }
 CeresSolver::~CeresSolver() {}
 void CeresSolver::SolveByNumericDiffCostFunction(Model& model, FramePtr cur_frame,FramePtr last_frame){
-    auto so3_ = last_frame->m_pose.m_pose.so3().log();
-    Sophus::Vector3d& t3_ = last_frame->m_pose.m_pose.translation();
+    auto so3_ = last_frame->m_pose.so3().log();
+    Sophus::Vector3d& t3_ = last_frame->m_pose.translation();
 
     double pose_initial[6] = {so3_(0),so3_(1),so3_(2),t3_(0),t3_(1),t3_(2)};
 
@@ -34,12 +34,12 @@ void CeresSolver::SolveByNumericDiffCostFunction(Model& model, FramePtr cur_fram
                     KK
             ));
     min_enery.AddResidualBlock(cost_function, NULL, pose_initial);
-    cur_frame->m_pose = Pose(pose_initial);
+    cur_frame->m_pose = Data2Pose(pose_initial);
 
 }
 void CeresSolver::SolveByCostFunctionWithJac(Model &model, FramePtr cur_frame, FramePtr last_frame){
-    auto so3_ = last_frame->m_pose.m_pose.so3().log();
-    Sophus::Vector3d& t3_ = last_frame->m_pose.m_pose.translation();
+    auto so3_ = last_frame->m_pose.so3().log();
+    Sophus::Vector3d& t3_ = last_frame->m_pose.translation();
 
     double pose_initial[6] = {so3_(0),so3_(1),so3_(2),t3_(0),t3_(1),t3_(2)};
     double* pose_var = pose_initial;
@@ -103,9 +103,9 @@ void CeresSolver::SolveByCostFunctionWithJac(Model &model, FramePtr cur_frame, F
         Sophus::Vector6d invv6d;
 //        std::cout<<v6d<<std::endl;
         invv6d<<v6d(3),v6d(4),v6d(5)  ,v6d(0),v6d(1),v6d(2);
-        cur_frame->m_pose.m_pose = Sophus::SE3d::exp(invv6d) * cur_frame->m_pose.m_pose;
-        auto so3_t = cur_frame->m_pose.m_pose.so3().log();
-        Sophus::Vector3d& t3_t = cur_frame->m_pose.m_pose.translation();
+        cur_frame->m_pose = Sophus::SE3d::exp(invv6d) * cur_frame->m_pose;
+        auto so3_t = cur_frame->m_pose.so3().log();
+        Sophus::Vector3d& t3_t = cur_frame->m_pose.translation();
 
         double pose_initial[6] = {so3_t(0),so3_t(1),so3_t(2),t3_t(0),t3_t(1),t3_t(2)};
         pose_var = pose_initial;
