@@ -206,7 +206,6 @@ void Model::getVisualableVertices(Sophus::SE3d &pose, cv::Mat& vis_vertices) {
 void Model::project3D_2D( Sophus::SE3d &pose, const cv::Mat& visible_Xs,  cv::Mat &visible_xs)
 {
     cv::Mat extrinsic = Se2cvf(pose);
-    std::cout<<extrinsic<<std::endl;
     visible_xs=intrinsic*extrinsic*visible_Xs;
     for (int i = 0; i < visible_xs.cols; ++i) {
         float dz = 1.0f/visible_xs.at<float>(2, i);

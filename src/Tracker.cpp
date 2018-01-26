@@ -67,7 +67,7 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
 
     //that's the result we want
 //    ceresSolver.SolveByNumericDiffCostFunction(model_,cur_frame,last_frame_);
-//    ceresSolver.SolveByCostFunctionWithJac(model_, cur_frame_, last_frame_);
+    ceresSolver.SolveByCostFunctionWithJac(model_, cur_frame_);
     cur_pose_ = cur_frame_->m_pose;
     Mat out = cur_frame_->img.clone();
     model_.displayCV(cur_frame_->m_pose,{0,255,0},out);
