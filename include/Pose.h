@@ -2,6 +2,7 @@
 #define _POSE_H_
 
 #include <Eigen/Dense>
+
 #include <sophus/se3.hpp>
 #include <opencv2/core.hpp>
 class Pose{
