@@ -23,6 +23,15 @@ void Frame::Segment()
 //    imshow("bound",this->bound_map);
 }
 
+void Frame::GetPyraid(const int &nPyraid) {
+    imgPyraid.resize(nPyraid);
+    Config &config= Config::configInstance();
+    for(int i =0;i<nPyraid;i++){
+        cv::Mat dst;
+        pyrDown(img, dst, Size(config.VIDEO_WIDTH /pow(2,i), config.VIDEO_HEIGHT/(2,i) ) );
+        imgPyraid[nPyraid-1-i]=dst.clone();
+    }
+}
 
 void Frame::DTMap() {
     vector<float> weights;

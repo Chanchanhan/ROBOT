@@ -10,6 +10,7 @@ class Frame
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	cv::Mat img;
+    std::vector<cv::Mat> imgPyraid;
     cv::Mat fw_posterior;
     cv::Mat bg_posterior;
 	//SE3D dpose;
@@ -28,8 +29,10 @@ public:
     double bg_prior;
 
 	unsigned int index;
+public:
 	void Segment();
 	void DTMap();
+    void GetPyraid(const int &nPyraid);
     cv::Point nearstContourP(const cv::Point &p);
     void ComputePosterior(const std::vector<Region>& rg);
 };
