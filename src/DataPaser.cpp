@@ -112,7 +112,6 @@ bool DataPaser::parseAFrame(FramePtr frame) {
         return false;
 
     cv::Mat frameDrawing = img.clone();
-
     float gtPose[6]={0};
     std::string str,temp;
     std::getline(gtData,str) ;
@@ -125,7 +124,6 @@ bool DataPaser::parseAFrame(FramePtr frame) {
         gt_line >> pos;
         gtPose[j] = pos;
     }
-
     memcpy(prePose,gtPose,sizeof(float)*6);
 
     frame->img=img.clone();
