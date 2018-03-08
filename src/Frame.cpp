@@ -22,21 +22,22 @@ void Frame::Segment()
     cv::drawContours(this->bound_map, contours,-1, CV_RGB(255, 255, 255),CV_FILLED);
 //    imshow("bound",this->bound_map);
 }
-void Frame::Segment(const cv::Mat &inPut,cv::Mat &segmentation,cv::Mat &bound_map,std::vector<cv::Point> &contourX2D){
+void Frame::Segment(const cv::Mat &inPutImg,const std::vector<cv::Point> &contourX2D,cv::Mat &segmentation,cv::Mat &bound_map){
     vector<vector<Point>> contours;
     contours.push_back(contourX2D);
-    segmentation = Mat::zeros(inPut.rows,inPut.cols,CV_8U);
-    bound_map = Mat::zeros(inPut.rows,inPut.cols,CV_32F);
+    segmentation = Mat::zeros(inPutImg.rows,inPutImg.cols,CV_8U);
+    bound_map = Mat::zeros(inPutImg.rows,inPutImg.cols,CV_32F);
     cv::drawContours(segmentation, contours,-1, CV_RGB(255, 255, 255), CV_FILLED);
     cv::drawContours(bound_map, contours,-1, CV_RGB(255, 255, 255),CV_FILLED);
 }
 void Frame::GetPyraid(const int &nPyraid) {
     imgPyramid.resize(nPyraid);
     Config &config= Config::configInstance();
-    for(int i =0;i<nPyraid;i++){
+    imgPyramid[0]=img.clone();
+    for(int i =1;i<nPyraid;i++){
         cv::Mat dst;
-        pyrDown(img, dst, Size(config.VIDEO_WIDTH /pow(2,i), config.VIDEO_HEIGHT/(2,i) ) );
-        imgPyramid[nPyraid-1-i]=dst.clone();
+        pyrDown(imgPyramid[i-1], dst,  Size(imgPyramid[i-1].cols*0.5,imgPyramid[i-1].rows*0.5) );
+        imgPyramid[i]=dst.clone();
     }
 }
 
@@ -65,7 +66,8 @@ cv::Point Frame::nearstContourP(const cv::Point &point) {
     }
     return Point(y,x);
 }
-void Frame::ComputePosterior(const cv::Mat &inPutImg,const std::vector<Region>& rg)
+
+void Frame::ComputePosterior(const cv::Mat &inPutImg,const std::vector<Region>& rg,cv::Mat &fw_posterior,cv::Mat &bg_posterior)
 {
     cv::Mat fw_posterior_tmp = Mat::zeros(inPutImg.size(),CV_64F) ;
     cv::Mat bg_posterior_tmp = Mat::zeros(inPutImg.size(),CV_64F) ;
@@ -142,6 +144,7 @@ void Frame::ComputePosterior(const cv::Mat &inPutImg,const std::vector<Region>& 
     bg_posteriorPyramid.push_back(bg_posterior_tmp);
 
 }
+
 
 void Frame::ComputePosterior(const std::vector<Region>& rg)
 {

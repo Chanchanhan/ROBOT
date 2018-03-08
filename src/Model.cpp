@@ -25,6 +25,14 @@ void Model::setIntrinsic() {
     intrinsic.at<float>(0,0)=gConfig.FX;    intrinsic.at<float>(0,1)=0;             intrinsic.at<float>(0,2)=gConfig.CX; intrinsic.at<float>(0,3)=0;
     intrinsic.at<float>(1,0)=0;             intrinsic.at<float>(1,1)=gConfig.FY;    intrinsic.at<float>(1,2)=gConfig.CY; intrinsic.at<float>(1,3)=0;
     intrinsic.at<float>(2,0)=0;             intrinsic.at<float>(2,1)=0;             intrinsic.at<float>(2,2)=1; intrinsic.at<float>(2,3)=0;
+
+    intrinsics.resize(gConfig.IMG_PYR_NUMBER);
+    intrinsics[0]=intrinsic.clone();
+    for(int i=1;i<gConfig.IMG_PYR_NUMBER;i++){
+        intrinsics[i]=intrinsics[i-1]/2;
+        intrinsics[i].at<float>(3,3)=1;
+    }
+
 }
 
 void Model::loadObj(const std::string& filename) {

@@ -57,7 +57,7 @@ void DataPaser::doTrakingWithVideo()
   while (videoCapture.read(img))
   {
       cv::Mat frameDrawing = img.clone();
-      Pose pose(prePose);
+      Sophus::SE3d pose = Data2Pose(prePose);
       if(!gConfig.USE_GT){
 	 
 	    
@@ -127,7 +127,7 @@ bool DataPaser::parseAFrame(FramePtr frame) {
     memcpy(prePose,gtPose,sizeof(float)*6);
 
     frame->img=img.clone();
-    frame->gt_Pose = Pose(gtPose);
+    frame->gt_Pose = Data2Pose(gtPose);
     return true;
 }
 

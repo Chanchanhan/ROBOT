@@ -4,7 +4,7 @@
 
 LOG_Threshold: 0
 Init_Frame_Index: 0
-USE_GT_DATA: 1
+USE_GT_DATA: 0
 
 
 # Input/Output directories and Sets
