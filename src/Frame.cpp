@@ -33,10 +33,11 @@ void Frame::Segment(const cv::Mat &inPut,cv::Mat &segmentation,cv::Mat &bound_ma
 void Frame::GetPyraid(const int &nPyraid) {
     imgPyramid.resize(nPyraid);
     Config &config= Config::configInstance();
-    for(int i =0;i<nPyraid;i++){
+    imgPyramid[0]=img.clone();
+    for(int i =1;i<nPyraid;i++){
         cv::Mat dst;
-        pyrDown(img, dst, Size(config.VIDEO_WIDTH /pow(2,i), config.VIDEO_HEIGHT/(2,i) ) );
-        imgPyramid[nPyraid-1-i]=dst.clone();
+        pyrDown(imgPyramid[i-1], dst,  Size(imgPyramid[i-1].cols*0.5,imgPyramid[i-1].rows*0.5) );
+        imgPyramid[i]=dst.clone();
     }
 }
 

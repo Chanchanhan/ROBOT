@@ -18,8 +18,8 @@ public:
     cv::Mat bg_posterior;
 	//SE3D dpose;
 	//SE3D grondTruthPose;
-	Pose m_pose;
-	Pose gt_Pose;
+	Sophus::SE3d m_pose;
+	Sophus::SE3d gt_Pose;
     cv::Mat segmentation;
     cv::Mat bound_map;
     cv::Mat dt;
