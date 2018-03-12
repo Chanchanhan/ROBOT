@@ -379,4 +379,3 @@ std::vector<cv::Point> Model::GetContourAt(Sophus::SE3d &pose) {
 //    }
 //    LOG(INFO)<<"verticesContour_xs.size() : "<<verticesContour_xs.size();
 //}
-

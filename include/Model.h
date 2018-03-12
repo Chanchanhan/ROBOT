@@ -20,17 +20,17 @@ public:
     //cv part
     void getContourPointsAndIts3DPoints( Sophus::SE3d &pose,std::vector<cv::Point3d> &verticesContour_Xs,
                                          std::vector<cv::Point2d> &verticesContour_xs,std::vector<cv::Point> &resContour);
-    void getContourPointsAndIts3DPoints( Sophus::SE3d &pose,std::vector<cv::Point3d> &verticesContour_Xs,
-                                         std::vector<cv::Point2d> &verticesContour_xs,std::vector<cv::Point> &resContour,const int iLevel);
     void SampleVertex(FramePtr frame,std::vector<cv::Point3d> &verticesContour_Xs,std::vector<cv::Point2d> &verticesContour_xs);
 
     void displayCV( Sophus::SE3d &pose,const cv::Scalar &color, cv::Mat& frame);
-    void displayCV( Sophus::SE3d &pose,const cv::Scalar &color, cv::Mat& frame,const int iLevel);
 
-public:
+
+
+    void getContourPointsAndIts3DPoints( Sophus::SE3d &pose,std::vector<cv::Point3d> &verticesContour_Xs,
+                                         std::vector<cv::Point2d> &verticesContour_xs,std::vector<cv::Point> &resContour,const int iLevel);
+    void displayCV( Sophus::SE3d &pose,const cv::Scalar &color, cv::Mat& frame,const int iLevel);
     cv::Mat intrinsic;
     std::vector<cv::Mat> intrinsics;
-
 private:
     void getVisualableVertices( Sophus::SE3d& pose, cv::Mat& vis_vertices);
 
@@ -42,7 +42,6 @@ private:
     std::vector<cv::Point> GetContourAt(Sophus::SE3d &pose);
     cv::Point X_to_x(const cv::Point3f &X,const cv::Mat &extrisic);
     cv::Point X_to_x(const cv::Point3f &X,const cv::Mat &extrisic,const int &iLevel);
-
     int VerticesCount() {return model_->numvertices;}
 private:
     inline void Cross(float* u, float* v, float* n) {
