@@ -5,17 +5,14 @@
 
 #include <sophus/se3.hpp>
 #include <opencv2/core.hpp>
-class Pose{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    Pose();
-    Pose(double data[6]);
-    Pose(float data[6]);
+#include <opencv2/core/eigen.hpp>
 
-    void getExtrinsicMat(cv::Mat &extrinsic);
-    ~Pose();
 
-  Sophus::SE3d m_pose ;
-};
+//for SE3 tranlation is before rotation;
+Sophus::SE3d Data2Pose(double * data);
+
+Sophus::SE3d Data2Pose(float * data);
+
+cv::Mat Se2cvf(Sophus::SE3d pose);
 
 #endif

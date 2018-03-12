@@ -4,7 +4,7 @@
 
 LOG_Threshold: 0
 Init_Frame_Index: 0
-USE_GT_DATA: 1
+USE_GT_DATA: 0
 
 
 # Input/Output directories and Sets
@@ -30,6 +30,6 @@ CV_DRAW_FRAME: 1
 TK_VER_NUMBER: 100
 
 #IMG
-IMG_PYR_NUMBER: 5
-IMG_DT_WEIGHT: 8
+IMG_PYR_NUMBER: 1
+IMG_DT_WEIGHT: 1
 

@@ -128,6 +128,8 @@ void Region::UpdateHistorgram(FramePtr curFrame)
         auto y = circle_bound_[i].y;
         for (int x = left; x <= circle_bound_[i].x; ++x)
         {
+            if(x<0||y<0||x>curFrame->segmentation.cols||y>=curFrame->segmentation.rows)
+                continue;
             if(curFrame->segmentation.at<unsigned char>(y,x))
             {
                 n_fw++;
@@ -159,9 +161,6 @@ void Region::UpdateHistorgram(Frame* curFrame)
     fill(bg.G,bg.G+255,1);
     fill(bg.R,bg.R+255,1);
 
-
-
-
     for (int i = 0; i < circle_bound_.size()-1; i++) {
         int left = circle_bound_[i].x;
         while(circle_bound_[i+1].y == circle_bound_[i].y)
@@ -169,6 +168,8 @@ void Region::UpdateHistorgram(Frame* curFrame)
         auto y = circle_bound_[i].y;
         for (int x = left; x <= circle_bound_[i].x; ++x)
         {
+            if(x<0||y<0||x>curFrame->segmentation.cols||y>=curFrame->segmentation.rows)
+                continue;
             if(curFrame->segmentation.at<unsigned char>(y,x))
             {
                 n_fw++;
