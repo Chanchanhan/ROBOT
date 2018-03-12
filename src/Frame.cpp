@@ -20,7 +20,6 @@ void Frame::Segment()
     this->bound_map = Mat::zeros(this->img.rows,this->img.cols,CV_32F);
     cv::drawContours(this->segmentation, contours,-1, CV_RGB(255, 255, 255), CV_FILLED);
     cv::drawContours(this->bound_map, contours,-1, CV_RGB(255, 255, 255),CV_FILLED);
-//    imshow("bound",this->bound_map);
 }
 void Frame::Segment(const cv::Mat &inPutImg,const std::vector<cv::Point> &contourX2D,cv::Mat &segmentation,cv::Mat &bound_map){
     vector<vector<Point>> contours;
@@ -28,7 +27,32 @@ void Frame::Segment(const cv::Mat &inPutImg,const std::vector<cv::Point> &contou
     segmentation = Mat::zeros(inPutImg.rows,inPutImg.cols,CV_8U);
     bound_map = Mat::zeros(inPutImg.rows,inPutImg.cols,CV_32F);
     cv::drawContours(segmentation, contours,-1, CV_RGB(255, 255, 255), CV_FILLED);
-    cv::drawContours(bound_map, contours,-1, CV_RGB(255, 255, 255),CV_FILLED);
+    cv::drawContours(bound_map, contours,-1, Scalar(255),CV_FILLED);
+  //  bound_map/=255;
+
+//    cv::cvtColor( bound_map, bound_map, cv::COLOR_RGB2GRAY );
+//    cv::blur( bound_map, bound_map, cv::Size(3,3) );
+//    cv::Canny( bound_map, bound_map, 20, 60, 3 );
+//    imshow("bound_map",bound_map);
+}
+cv::Mat edgeCanny(const cv::Mat &src)
+{
+
+    cv::Mat  src_gray, dst, detected_edges;
+    cv::cvtColor( src, src_gray, cv::COLOR_BGR2GRAY );
+
+    dst.create( src.size(), src.type() );
+    cv::blur( src_gray, detected_edges, cv::Size(3,3) );
+    cv::Canny( detected_edges, detected_edges, 20, 60, 3 );
+
+    dst = cv::Scalar::all(0);
+    src.copyTo( dst, detected_edges);
+//   cv::cvtColor(dst, dst, CV_BGR2GRAY);
+//   cv::cvtColor(dst, dst, CV_GRAY2BGR);
+
+//   cv::imshow( "canny dst", dst );
+//   cv::waitKey(0);
+    return dst;
 }
 void Frame::GetPyraid(const int &nPyraid) {
     imgPyramid.resize(nPyraid);
@@ -42,9 +66,34 @@ void Frame::GetPyraid(const int &nPyraid) {
 }
 
 void Frame::DTMap() {
+    //
+//    cv::Mat edge = edgeCanny(this->bound_map);
+//   // cv::cvtColor(edge, edge, CV_BGR2GRAY);
+//    edge=~edge;
+//    imshow("edge",edge);
+//    waitKey(0);
+//    cv::Mat input=cv::Mat::zeros(edge.size(),CV_32FC1);
+//    edge.convertTo(input,CV_32FC1, 1/*/255.0f*/);
+//    vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);
+//
+//    distanceTransform(input,this->dt,this->dtLocation,weights);
+    //
     vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);
-    distanceTransform(this->bound_map,this->dt,this->dtLocation,weights);/// it's wired
-    imshow("dtx",dt);
+    cv::Mat dt1,dt2;
+    int k=100;
+    this->bound_map*=k;
+    distanceTransform(this->bound_map,dt1,this->dtLocation,weights);/// dt1 is outside
+    distanceTransform(k*255-this->bound_map,dt2,this->dtLocation,weights);///dt2 is insied
+    normalize(dt1,dt1,1.0,0.0,NORM_MINMAX);
+    normalize(dt2,dt2,1.0,0.0,NORM_MINMAX);
+
+    //LOG(INFO)<<"bound_map"<<this->bound_map;
+   // LOG(INFO)<<"dt"<<this->dt;
+    this->dt= dt1-dt2;
+
+    imshow("dt",this->dt);
+
+
 }
 void Frame::DTMap(const cv::Mat &inPut,cv::Mat &dt,cv::Mat &dtLocation) {
     vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);

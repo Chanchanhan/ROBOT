@@ -70,7 +70,7 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
 
 
         cur_frame_->DTMap();
-        cv::imshow("dt",cur_frame_->dt);
+        //cv::imshow("dt",cur_frame_->dt);
         cv::waitKey(0);
         //that's the result we want
         //ceresSolver.SolveByNumericDiffCostFunction(model_,cur_frame,last_frame_);
