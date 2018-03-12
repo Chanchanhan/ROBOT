@@ -26,7 +26,7 @@ void Frame::Segment(const cv::Mat &inPutImg,const std::vector<cv::Point> &contou
     contours.push_back(contourX2D);
     segmentation = Mat::zeros(inPutImg.rows,inPutImg.cols,CV_8U);
     bound_map = Mat::zeros(inPutImg.rows,inPutImg.cols,CV_32F);
-    cv::drawContours(segmentation, contours,-1, CV_RGB(255, 255, 255), CV_FILLED);
+    cv::drawContours(segmentation, contours,-1, Scalar(255), CV_FILLED);
     cv::drawContours(bound_map, contours,-1, Scalar(255),CV_FILLED);
   //  bound_map/=255;
 
@@ -35,25 +35,7 @@ void Frame::Segment(const cv::Mat &inPutImg,const std::vector<cv::Point> &contou
 //    cv::Canny( bound_map, bound_map, 20, 60, 3 );
 //    imshow("bound_map",bound_map);
 }
-cv::Mat edgeCanny(const cv::Mat &src)
-{
 
-    cv::Mat  src_gray, dst, detected_edges;
-    cv::cvtColor( src, src_gray, cv::COLOR_BGR2GRAY );
-
-    dst.create( src.size(), src.type() );
-    cv::blur( src_gray, detected_edges, cv::Size(3,3) );
-    cv::Canny( detected_edges, detected_edges, 20, 60, 3 );
-
-    dst = cv::Scalar::all(0);
-    src.copyTo( dst, detected_edges);
-//   cv::cvtColor(dst, dst, CV_BGR2GRAY);
-//   cv::cvtColor(dst, dst, CV_GRAY2BGR);
-
-//   cv::imshow( "canny dst", dst );
-//   cv::waitKey(0);
-    return dst;
-}
 void Frame::GetPyraid(const int &nPyraid) {
     imgPyramid.resize(nPyraid);
     Config &config= Config::configInstance();
@@ -66,18 +48,7 @@ void Frame::GetPyraid(const int &nPyraid) {
 }
 
 void Frame::DTMap() {
-    //
-//    cv::Mat edge = edgeCanny(this->bound_map);
-//   // cv::cvtColor(edge, edge, CV_BGR2GRAY);
-//    edge=~edge;
-//    imshow("edge",edge);
-//    waitKey(0);
-//    cv::Mat input=cv::Mat::zeros(edge.size(),CV_32FC1);
-//    edge.convertTo(input,CV_32FC1, 1/*/255.0f*/);
-//    vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);
-//
-//    distanceTransform(input,this->dt,this->dtLocation,weights);
-    //
+
     vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);
     cv::Mat dt1,dt2;
     int k=100;
@@ -90,8 +61,7 @@ void Frame::DTMap() {
     //LOG(INFO)<<"bound_map"<<this->bound_map;
    // LOG(INFO)<<"dt"<<this->dt;
     this->dt= dt1-dt2;
-
-    imshow("dt",this->dt);
+   // imshow("dt",this->dt);
 
 
 }

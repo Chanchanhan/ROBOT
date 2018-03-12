@@ -100,7 +100,7 @@ void Model::getContourPointsAndIts3DPoints(Sophus::SE3d &pose, std::vector<cv::P
         }
     }
 
-    std::vector<std::vector<cv::Point> > contours;
+    std::vector<std::vector<cv::Point>> contours;
 
     cv::Mat line_img = cv::Mat::zeros(height,weight, CV_8UC1);
     displayCV(pose, cv::Scalar(255, 255, 255), line_img,iLevel);
@@ -110,8 +110,8 @@ void Model::getContourPointsAndIts3DPoints(Sophus::SE3d &pose, std::vector<cv::P
     cv::drawContours(mask_img, contours, -1, CV_RGB(255, 255, 255), CV_FILLED);
   //  cv::imshow("line_img",line_img);
 
- //   cv::imshow("mask_img",mask_img);
-  //  cv::waitKey(0);
+   // cv::imshow("mask_img",mask_img);
+   // cv::waitKey(0);
     /***to map X-x***/
     if (contours.size() == 0) {
         return;

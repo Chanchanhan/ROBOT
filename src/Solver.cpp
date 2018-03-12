@@ -5,7 +5,7 @@
 #include "Solver.h"
 #include "Model.h"
 #include <opencv2/core/eigen.hpp>
-
+#include <glog/logging.h>
 using namespace Sophus;
 
 class CostFunctionByJac : public ceres::SizedCostFunction<1, 6> {
@@ -41,14 +41,14 @@ public:
 
 //            auto sigmoid = [](double x){1.0/(1.0+std::exp(-Thetax))};
 //            auto He = (1.0) / ((1) + ceres::exp(-Thetax));
-
-        double He;
-        if(Thetax>8)
-            He = 0;
-        else if(Thetax>-8)
-            He = 0.5;
-        else
-            He = 1;
+        const int b=8;
+        double He = M_1_PI*(-atan(b*Thetax)+M_PI_2);
+//        if(Thetax>8)
+//            He = 0;
+//        else if(Thetax>-8)
+//            He = 0.5;
+//        else
+//            He = 1;
 
         double left = (abs(Thetax) <= 8.0f) * (fwd_.at<double>(x_plane) - bg_.at<double>(x_plane)) /
                       (He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane));
@@ -188,15 +188,16 @@ void CeresSolver::SolveByCostFunctionWithJac(Model &model, FramePtr cur_frame){
             r_sum += r;
         }
         std::cout<<r_sum/cur_frame->VerticesNear2ContourX3D.size()<<std::endl;
-        std::cout<<cur_frame->VerticesNear2ContourX3D.size()<<std::endl;
+//        std::cout<<cur_frame->VerticesNear2ContourX3D.size()<<std::endl;
 //        if(r_sum>last)
 //            break;
         last = r_sum;
-    //    ceres::Solver::Summary summary;
+        LOG(INFO)<<"r_sum"<<r_sum;
+        ceres::Solver::Summary summary;
 
 
-    //    ceres::Solve(options, &min_enery, &summary);
-//        std::cout<<cur_frame->m_pose.m_pose.log()<<std::endl;
+        ceres::Solve(options, &min_enery, &summary);
+        std::cout<<cur_frame->m_pose.log()<<std::endl;
         Sophus::Vector6d v6d =  jtjsum.inverse()*j;
 //        std::cout<<v6d<<std::endl;
         cur_frame->m_pose = Sophus::SE3d::exp(v6d) * cur_frame->m_pose;

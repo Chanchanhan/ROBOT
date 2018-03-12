@@ -40,6 +40,8 @@ void Tracker::ProcessFirstFrame(FramePtr cur_frame)
 void Tracker::ProcessFrame(FramePtr cur_frame) {
     last_frame_ = cur_frame_;
     cur_frame_ = cur_frame;
+    cur_frame_->GetPyraid(Config::configInstance().IMG_PYR_NUMBER);
+
     //TODO:...
     if(last_frame_.use_count()!=0) {
         cur_pose_ = last_frame_->m_pose;
@@ -53,6 +55,8 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
                 cur_pose_,cur_frame_->VerticesNear2ContourX3D,
                 cur_frame_->VerticesNear2ContourX2D,
                 cur_frame_->contourX2D,iLevel);
+        if(cur_frame_->contourX2D.size()==0||cur_frame_->VerticesNear2ContourX3D.size()==0)
+            continue;
         cv::Mat segment,boundMap;
         std::vector<cv::Point> contourX2D;
         cur_frame_->Segment(cur_frame_->imgPyramid[iLevel],cur_frame_->contourX2D, cur_frame_->segmentation,cur_frame_->bound_map);
@@ -70,8 +74,6 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
 
 
         cur_frame_->DTMap();
-        //cv::imshow("dt",cur_frame_->dt);
-        cv::waitKey(0);
         //that's the result we want
         //ceresSolver.SolveByNumericDiffCostFunction(model_,cur_frame,last_frame_);
         ceresSolver.SolveByCostFunctionWithJac(model_, cur_frame_);
