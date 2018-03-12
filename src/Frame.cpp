@@ -43,8 +43,8 @@ void Frame::GetPyraid(const int &nPyraid) {
 
 void Frame::DTMap() {
     vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);
-    distanceTransform(this->bound_map,dt,dtLocation,weights);/// it's wired
-  //  imshow("dt",dt);
+    distanceTransform(this->bound_map,this->dt,this->dtLocation,weights);/// it's wired
+    imshow("dtx",dt);
 }
 void Frame::DTMap(const cv::Mat &inPut,cv::Mat &dt,cv::Mat &dtLocation) {
     vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);

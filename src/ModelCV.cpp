@@ -103,15 +103,15 @@ void Model::getContourPointsAndIts3DPoints(Sophus::SE3d &pose, std::vector<cv::P
     std::vector<std::vector<cv::Point> > contours;
 
     cv::Mat line_img = cv::Mat::zeros(height,weight, CV_8UC1);
-    displayCV(pose, cv::Scalar(255, 255, 255), line_img);
+    displayCV(pose, cv::Scalar(255, 255, 255), line_img,iLevel);
     cv::findContours(line_img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
     cv::Mat mask_img = cv::Mat::zeros(height, weight,CV_8UC1);
     cv::drawContours(mask_img, contours, -1, CV_RGB(255, 255, 255), CV_FILLED);
-    cv::imshow("line_img",line_img);
+  //  cv::imshow("line_img",line_img);
 
-    cv::imshow("mask_img",mask_img);
-    cv::waitKey(0);
+ //   cv::imshow("mask_img",mask_img);
+  //  cv::waitKey(0);
     /***to map X-x***/
     if (contours.size() == 0) {
         return;
@@ -334,7 +334,7 @@ void Model::project3D_2D( Sophus::SE3d &pose, const cv::Mat& visible_Xs,  cv::Ma
 {
     cv::Mat extrinsic = Se2cvf(pose);
     visible_xs=intrinsics[iLevel]*extrinsic*visible_Xs;
-    LOG(INFO)<<"new Intrinsic: "<<intrinsics[iLevel];
+//    LOG(INFO)<<"new Intrinsic: "<<intrinsics[iLevel];
     for (int i = 0; i < visible_xs.cols; ++i) {
         float dz = 1.0f/visible_xs.at<float>(2, i);
         visible_xs.at<float>(0, i) *= dz;

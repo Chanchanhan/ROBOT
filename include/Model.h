@@ -24,7 +24,8 @@ public:
 
     void displayCV( Sophus::SE3d &pose,const cv::Scalar &color, cv::Mat& frame);
 
-
+    bool pointInFrame(const cv::Point &p);
+    bool pointInFrame(const cv::Point &p,const int iLevel);
 
     void getContourPointsAndIts3DPoints( Sophus::SE3d &pose,std::vector<cv::Point3d> &verticesContour_Xs,
                                          std::vector<cv::Point2d> &verticesContour_xs,std::vector<cv::Point> &resContour,const int iLevel);
@@ -37,8 +38,7 @@ private:
     void project3D_2D( Sophus::SE3d &pose, const cv::Mat& visible_Xs,  cv::Mat &visible_xs);
     void project3D_2D( Sophus::SE3d &pose, const cv::Mat& visible_Xs,  cv::Mat &visible_xs,const int iLevel);
 
-    bool pointInFrame(const cv::Point &p);
-    bool pointInFrame(const cv::Point &p,const int iLevel);
+
     std::vector<cv::Point> GetContourAt(Sophus::SE3d &pose);
     cv::Point X_to_x(const cv::Point3f &X,const cv::Mat &extrisic);
     cv::Point X_to_x(const cv::Point3f &X,const cv::Mat &extrisic,const int &iLevel);

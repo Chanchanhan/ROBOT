@@ -55,7 +55,7 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
                 cur_frame_->contourX2D,iLevel);
         cv::Mat segment,boundMap;
         std::vector<cv::Point> contourX2D;
-        cur_frame_->Segment(cur_frame_->imgPyramid[iLevel],cur_frame_->contourX2D, segment,boundMap);
+        cur_frame_->Segment(cur_frame_->imgPyramid[iLevel],cur_frame_->contourX2D, cur_frame_->segmentation,cur_frame_->bound_map);
         std::vector<Region> sample_regions;
         for (auto v:cur_frame_->contourX2D) {
             sample_regions.emplace_back(v,10);
@@ -70,6 +70,8 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
 
 
         cur_frame_->DTMap();
+        cv::imshow("dt",cur_frame_->dt);
+        cv::waitKey(0);
         //that's the result we want
         //ceresSolver.SolveByNumericDiffCostFunction(model_,cur_frame,last_frame_);
         ceresSolver.SolveByCostFunctionWithJac(model_, cur_frame_);
