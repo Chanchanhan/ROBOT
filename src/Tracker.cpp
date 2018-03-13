@@ -20,22 +20,8 @@ void Tracker::ProcessFirstFrame(FramePtr cur_frame)
 {
     cur_frame_ = cur_frame;
     cur_frame_->m_pose = cur_frame->gt_Pose;
-//    model_.getContourPointsAndIts3DPoints(
-//            cur_pose_,cur_frame_->VerticesNear2ContourX3D,
-//            cur_frame_->VerticesNear2ContourX2D,
-//            cur_frame_->contourX2D);
-//    cur_frame_->Segment();
-//    cur_frame_->DTMap();
-//    std::vector<Region> sample_regions;
-//    for (auto v:cur_frame_->contourX2D) {
-//        sample_regions.emplace_back(v,10);
-//    }
-//  cur_frame_->fw_posteriorPyramid.resize(Config::configInstance().IMG_PYR_NUMBER);
     cur_frame_->GetPyraid(Config::configInstance().IMG_PYR_NUMBER);
-
-    // cur_frame_->ComputePosterior(sample_regions);
 }
-
 
 void Tracker::ProcessFrame(FramePtr cur_frame) {
     last_frame_ = cur_frame_;
@@ -47,9 +33,6 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         cur_pose_ = last_frame_->m_pose;
         cur_frame_->m_pose = last_frame_->m_pose;
     }
-    //
-//    cur_frame_->m_pose = cur_frame_->gt_Pose;
-
     for(int iLevel=Config::configInstance().IMG_PYR_NUMBER-1;iLevel>=0;iLevel--){
         model_.getContourPointsAndIts3DPoints(
                 cur_pose_,cur_frame_->VerticesNear2ContourX3D,
