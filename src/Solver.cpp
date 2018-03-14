@@ -32,12 +32,12 @@ void CeresSolver::SolveByCostFunctionWithJac(Model &model, FramePtr cur_frame){
 //    }
     Sophus::Matrix3d KK;
 
-    ceres::Problem minEnergyProblem;
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             KK(i,j) = model.intrinsic.at<float>(i,j);
         }
     }
+    ceres::Problem minEnergyProblem;
 
     for (int i = 0; i < cur_frame->VerticesNear2ContourX3D.size(); i++) {
         auto Xi = cur_frame->VerticesNear2ContourX3D[i];

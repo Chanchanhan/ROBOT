@@ -94,7 +94,7 @@ class CeresSolver {
             Eigen::MatrixXd jac = left * j_Phi_x * j_X_Lie;
             LOG(INFO)<<"left = "<<left;
             LOG(INFO)<<"j_Phi_x = "<<j_Phi_x;
-            LOG(INFO)<<"j_X_Lie = "<<j_X_Lie;
+            LOG(INFO)<<"jac = "<<jac;
             for (int i = 0; i < 6; i++) {
                 jacobian[i] = jac(0, i);
             }

@@ -95,24 +95,10 @@ cv::Point Frame::nearstContourP(const cv::Point &point) {
 void Frame::ComputePosterior(const std::vector<Region>& rg)
 {
 
-    //test
 
 
     fw_posterior = Mat::zeros(img.size(),CV_64F) ;
     bg_posterior = Mat::zeros(img.size(),CV_64F) ;
-
-    //use gt
-    // fw_posterior= (segmentation>0);
-//    bg_posterior= (segmentation==0);
-//    for(int i=0;i<img.rows;i++){
-//        for(int j=0;j<img.cols;j++){
-//            if(fw_posterior.at<float>(i,j) >0){
-//                cout<<bg_posterior.at<float>(i,j);
-//
-//            }
-//        }
-//    }
-   // return;
 
     Mat occur = Mat::zeros(img.size(),CV_16S);
     Histogram overall_fw;

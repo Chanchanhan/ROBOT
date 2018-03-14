@@ -6,7 +6,7 @@
 #include "Tracker.h"
 #include "GlobalConfig.h"
 #include "Region.h"
-
+#include "MySolver.h"
 using namespace cv;
 using namespace std;
 using namespace ceres;
@@ -63,11 +63,19 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         cur_frame_->DTMap();
         //that's the result we want
         //ceresSolver.SolveByNumericDiffCostFunction(model_,cur_frame,last_frame_);
-        ceresSolver.SolveByCostFunctionWithJac(model_, cur_frame_);
-        cur_pose_ = cur_frame_->m_pose;
+        Mat input = cur_frame_->img.clone();
+        model_.displayCV(cur_frame_->m_pose,{0,255,0},input);
+        imshow("input",input);
+        MySolver mySolver(model_.intrinsics[iLevel]);
+        mySolver.Solve(cur_frame_, iLevel);
+
+//        ceresSolver.SolveByCostFunctionWithJac(model_, cur_frame_);
+//        cur_pose_ = cur_frame_->m_pose;
+
+
         Mat out = cur_frame_->img.clone();
         model_.displayCV(cur_frame_->m_pose,{0,255,0},out);
-        imshow("initial",out);
+        imshow("outPut",out);
         imshow("result",post_map);
         waitKey(0);
     }
