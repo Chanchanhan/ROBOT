@@ -16,12 +16,14 @@ CeresSolver::CeresSolver() {
     options.trust_region_strategy_type = ceres::LEVENBERG_MARQUARDT;
     options.minimizer_progress_to_stdout = false;
     options.max_num_iterations = 25;
+    options.gradient_tolerance = 1e-15;
+    options.function_tolerance = 1e-15;
+
+
 }
 CeresSolver::~CeresSolver() {}
 void CeresSolver::SolveByCostFunctionWithJac(Model &model, FramePtr cur_frame){
-
     Vector6d pose_initial = cur_frame->m_pose.log();
-
     double* pose_var = pose_initial.data();
     assert(pose_var);
 //    LOG(INFO)<<"pose_var input:";
@@ -29,7 +31,6 @@ void CeresSolver::SolveByCostFunctionWithJac(Model &model, FramePtr cur_frame){
 //        LOG(INFO)<<pose_var[i];
 //    }
     Sophus::Matrix3d KK;
-//    cv::cv2eigen(model.intrinsic,KK);
 
     ceres::Problem minEnergyProblem;
     for (int i = 0; i < 3; ++i) {

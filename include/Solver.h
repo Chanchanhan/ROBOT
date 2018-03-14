@@ -45,21 +45,21 @@ class CeresSolver {
             Sophus::Vector3d X_Camera_coord = m_pose * Xis;
             Sophus::Vector3d x3 = K_ * X_Camera_coord;
             cv::Point x_plane(x3(0) / x3(2), x3(1) / x3(2));
-            auto Thetax = (double) (dt_map_.at<float>(x_plane));
+            auto Theta_x = (double) (dt_map_.at<float>(x_plane));
 
-//            auto sigmoid = [](double x){1.0/(1.0+std::exp(-Thetax))};
-//            auto He = (1.0) / ((1) + ceres::exp(-Thetax));
-            const int b=8;
-            double He = M_1_PI*(-atan(b*Thetax)+M_PI_2);
-//        if(Thetax>8)
+//            auto sigmoid = [](double x){1.0/(1.0+std::exp(-Theta_x))};
+//            auto He = (1.0) / ((1) + ceres::exp(-Theta_x));
+            const int b=Config::configInstance().SV_HE_b;
+            double He = M_1_PI*(-atan(b*Theta_x)+M_PI_2);
+            double phi = -M_1_PI*b/(1+b*b*Theta_x*Theta_x);
+//        if(Theta_x>8)
 //            He = 0;
-//        else if(Thetax>-8)
+//        else if(Theta_x>-8)
 //            He = 0.5;
 //        else
 //            He = 1;
-
-            double left = (abs(Thetax) <= 8.0f) * (fwd_.at<double>(x_plane) - bg_.at<double>(x_plane)) /
-                          (He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane));
+            double left =  phi* (fwd_.at<double>(x_plane) - bg_.at<double>(x_plane)) /
+                           (He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane));
 
 
             Eigen::MatrixXd j_X_Lie(2, 6);
@@ -69,11 +69,9 @@ class CeresSolver {
             double _x_in_Camera = X_Camera_coord[0];
             double _y_in_Camera = X_Camera_coord[1];
             double _z_in_Camera = X_Camera_coord[2];
-            if(!fabs((He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane))>0.1)) {
-                _x_in_Camera = 1;
-                std::cout<<x_plane<<std::endl;
-            }
+
 //        assert(fabs((He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane)))>0.001);
+
 
             j_X_Lie(0, 0) = -gConfig.FX / _z_in_Camera;
             j_X_Lie(0, 1) = 0;
@@ -94,11 +92,15 @@ class CeresSolver {
             j_Phi_x(0, 1) = 0.5f * (dt_map_.at<float>(cv::Point(x_plane.x, x_plane.y + 1)) -
                                     dt_map_.at<float>(cv::Point(x_plane.x, x_plane.y - 1)));
             Eigen::MatrixXd jac = left * j_Phi_x * j_X_Lie;
-
+            LOG(INFO)<<"left = "<<left;
+            LOG(INFO)<<"j_Phi_x = "<<j_Phi_x;
+            LOG(INFO)<<"j_X_Lie = "<<j_X_Lie;
             for (int i = 0; i < 6; i++) {
                 jacobian[i] = jac(0, i);
             }
             residuals[0] = (-ceres::log(He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane))) ;
+            //  LOG(INFO)<<"jac = "<<jac;
+            // LOG(INFO)<<"residuals[0] = " <<residuals[0];
             return true;
         }
 
