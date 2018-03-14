@@ -69,6 +69,8 @@ void MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
 
     const int b=Config::configInstance().SV_HE_b;
     double He = M_1_PI*(-atan(b*Theta_x)+M_PI_2);
+    if(std::isnan(energy))
+        return;
     energy += (-log(He * cur_frame->fw_posterior.at<double>(x_plane) + (1 - He) * cur_frame->bg_posterior.at<double>(x_plane))) ;
 
 }
