@@ -43,7 +43,8 @@ private:
     bool ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, double &energy);
 private:
     Option option;
-
+    std::vector<bool> pointStateTmp;
+    int k_th_tmp;
     Sophus::Matrix3d K_;
 };
 

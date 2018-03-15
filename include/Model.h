@@ -35,7 +35,7 @@ public:
     std::vector<cv::Mat> intrinsics;
 private:
     void GetVisualableVertices(const Sophus::SE3d &pose, cv::Mat &vis_vertices);
-    void DrawOnePoint(const cv::Mat &extrinsic,const cv::Point3d &X,cv::Mat &frame,const int iLevel);
+    void DrawOnePoint(const cv::Mat &extrinsic,const cv::Point3d &X,cv::Mat &frame,const cv::Scalar scalar,const int iLevel);
 
     void Project3D_2D(const Sophus::SE3d &pose, const cv::Mat &visible_Xs, cv::Mat &visible_xs, const int iLevel = 0);
 

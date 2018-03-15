@@ -129,13 +129,19 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
                        const int iLevel) {
     cv::Mat extrinsic(4, 4, CV_32FC1);
     extrinsic = Se2cvf(pose);
-    for(auto X:Xs){
-        DrawOnePoint(extrinsic,X,frame,iLevel);
+    for(int i=0;i<Xs.size();i++){
+        if(Config::configInstance().pointState[i]){
+            DrawOnePoint(extrinsic,Xs[i],frame,cv::Scalar(0,0,255), iLevel);//inside
+
+        }else {
+            DrawOnePoint(extrinsic,Xs[i],frame,cv::Scalar(255,0,0), iLevel);//outside
+
+        }
     }
 }
-void Model::DrawOnePoint(const cv::Mat &extrinsic, const cv::Point3d &X,cv::Mat &frame, const int iLevel) {
+void Model::DrawOnePoint(const cv::Mat &extrinsic, const cv::Point3d &X,cv::Mat &frame,const cv::Scalar scalar, const int iLevel) {
     auto p2d= X_to_x(X,extrinsic,iLevel);
-    circle(frame,p2d,3,Scalar(100,100,10));
+    circle(frame,p2d,3,scalar);
 }
 
 void Model::DisplayCV(const Sophus::SE3d &pose, const cv::Scalar &color, cv::Mat &frame, const int iLevel)
