@@ -51,14 +51,14 @@ class CeresSolver {
 //            auto He = (1.0) / ((1) + ceres::exp(-Theta_x));
             const int b=Config::configInstance().SV_HE_b;
             double He = M_1_PI*(-atan(b*Theta_x)+M_PI_2);
-            double phi = -M_1_PI*b/(1+b*b*Theta_x*Theta_x);
+            double delta = -M_1_PI*b/(1+b*b*Theta_x*Theta_x);
 //        if(Theta_x>8)
 //            He = 0;
 //        else if(Theta_x>-8)
 //            He = 0.5;
 //        else
 //            He = 1;
-            double left =  phi* (fwd_.at<double>(x_plane) - bg_.at<double>(x_plane)) /
+            double left =  delta* (fwd_.at<double>(x_plane) - bg_.at<double>(x_plane)) /
                            (He * fwd_.at<double>(x_plane) + (1 - He) * bg_.at<double>(x_plane));
 
 

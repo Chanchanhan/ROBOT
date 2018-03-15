@@ -9,18 +9,9 @@
 
 #include "Region.h"
 
-
 using namespace cv;
 using namespace std;
-void Frame::Segment()
-{
-    vector<vector<Point> > contours;
-    contours.push_back(this->contourX2D);
-    this->segmentation = Mat::zeros(this->img.rows,this->img.cols,CV_8U);
-    this->bound_map = Mat::zeros(this->img.rows,this->img.cols,CV_8UC1);
-    cv::drawContours(this->segmentation, contours,-1, CV_RGB(255, 255, 255), CV_FILLED);
-    cv::drawContours(this->bound_map, contours,-1, CV_RGB(255, 255, 255),CV_FILLED);
-}
+
 void Frame::Segment(const cv::Mat &inPutImg,const std::vector<cv::Point> &contourX2D,cv::Mat &segmentation,cv::Mat &bound_map){
     vector<vector<Point>> contours;
     contours.push_back(contourX2D);
@@ -92,15 +83,25 @@ cv::Point Frame::nearstContourP(const cv::Point &point) {
 
 
 
-void Frame::ComputePosterior(const std::vector<Region>& rg)
+void Frame::ComputePosterior(const Mat &inputImg,const std::vector<Region>& rg)
 {
 
 
 
-    fw_posterior = Mat::zeros(img.size(),CV_64F) ;
-    bg_posterior = Mat::zeros(img.size(),CV_64F) ;
+    fw_posterior = Mat::zeros(inputImg.size(),CV_64F) ;
+    bg_posterior = Mat::zeros(inputImg.size(),CV_64F) ;
+#ifdef  PROJECT_WITH_GT
 
-    Mat occur = Mat::zeros(img.size(),CV_16S);
+    for(int i=0;i<segmentation.rows;i++){
+        for (int j=0;j<segmentation.cols;j++){
+            fw_posterior.at<double>(i,j) = segmentation.at<unsigned char>(i,j)>0?1:0;
+        }
+    }
+    bg_posterior=1-fw_posterior;
+    return;
+#endif
+
+    Mat occur = Mat::zeros(inputImg.size(),CV_16S);
     Histogram overall_fw;
     Histogram overall_bg;
     double fw_pixels = 0;
@@ -115,7 +116,7 @@ void Frame::ComputePosterior(const std::vector<Region>& rg)
                 i++;
             auto y = s.circle_bound_[i].y;
             for (int x = left; x < s.circle_bound_[i].x; ++x) {
-                auto& p = img.at<Vec3b>(y,x);
+                auto& p = inputImg.at<Vec3b>(y,x);
                 occur.at<short>(y,x)++;
                 auto ar = s.aera;
                 auto fw_likelihood = (s.fwd.B[p[0]]/s.n_fw
@@ -137,7 +138,7 @@ void Frame::ComputePosterior(const std::vector<Region>& rg)
     auto p1 = occur.ptr<short>(0);
     auto f = fw_posterior.ptr<double>(0);
     auto b = bg_posterior.ptr<double>(0);
-    auto imgp = img.ptr<Vec3b>(0);
+    auto imgp = inputImg.ptr<Vec3b>(0);
     auto oc = occur.ptr<short>(0);
     double temp;
     auto all_pixel = fw_pixels + bg_pixels;

@@ -11,7 +11,6 @@ using namespace cv;
 using namespace std;
 using namespace ceres;
 
-
 void Tracker::init(const OcvYamlConfig& ocvYamlConfig) {
     model_.loadObj(Config::configInstance().objFile);
 }
@@ -34,10 +33,19 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         cur_frame_->m_pose = last_frame_->m_pose;
     }
     for(int iLevel=Config::configInstance().IMG_PYR_NUMBER-1;iLevel>=0;iLevel--){
+#ifdef   PROJECT_WITH_GT
+        model_.getContourPointsAndIts3DPoints(
+                cur_frame->gt_Pose,cur_frame_->VerticesNear2ContourX3D,
+                cur_frame_->VerticesNear2ContourX2D,
+                cur_frame_->contourX2D,iLevel);
+#else
         model_.getContourPointsAndIts3DPoints(
                 cur_pose_,cur_frame_->VerticesNear2ContourX3D,
                 cur_frame_->VerticesNear2ContourX2D,
                 cur_frame_->contourX2D,iLevel);
+#endif
+
+
         if(cur_frame_->contourX2D.size()==0||cur_frame_->VerticesNear2ContourX3D.size()==0)
             continue;
         cv::Mat segment,boundMap;
@@ -51,11 +59,12 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         }
 
 
-        last_frame_->ComputePosterior(sample_regions);
-        cur_frame_->ComputePosterior(sample_regions);
+        last_frame_->ComputePosterior(last_frame_->imgPyramid[iLevel],sample_regions);
+        cur_frame_->ComputePosterior(cur_frame_->imgPyramid[iLevel],sample_regions);
 
         cur_frame_->fw_posterior = last_frame_->fw_posterior*0.9+cur_frame_->fw_posterior*0.1;
         cur_frame_->bg_posterior = last_frame_->bg_posterior*0.8+cur_frame_->bg_posterior*0.2;
+
         Mat post_map = cur_frame_->fw_posterior > cur_frame_->bg_posterior;
         // post_map = post_map*255;
 
@@ -65,12 +74,11 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         //ceresSolver.SolveByNumericDiffCostFunction(model_,cur_frame,last_frame_);
         Mat input = cur_frame_->img.clone();
         model_.displayCV(cur_frame_->m_pose,{0,255,0},input);
+
         imshow("input",input);
         MySolver mySolver(model_.intrinsics[iLevel]);
         mySolver.Solve(cur_frame_, iLevel);
 
-//        ceresSolver.SolveByCostFunctionWithJac(model_, cur_frame_);
-//        cur_pose_ = cur_frame_->m_pose;
 
 
         Mat out = cur_frame_->img.clone();

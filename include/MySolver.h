@@ -16,18 +16,20 @@
 class Model;
 
 class MySolver {
-    struct option{
+    struct Option{
+        int max_iterations;
+        double lamda;
+        double lamdaSmaller;
+        double energyOK;
+        double energyLittle;
+
+        double energyTooSmallSize;
+        double stepTooBigSize;
 
     };
 public:
     MySolver(){}
-    MySolver(cv::Mat &intrinsic){
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                K_(i,j) = intrinsic.at<float>(i,j);
-            }
-        }
-    }
+    MySolver(cv::Mat &intrinsic);
     void Solve(FramePtr cur_frame, const int &iLevel = 0);
 
 private:
@@ -39,7 +41,7 @@ private:
 
     void ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, double &energy);
 private:
-
+    Option option;
     Sophus::Matrix3d K_;
 };
 

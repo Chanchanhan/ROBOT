@@ -40,8 +40,7 @@ public:
     void DTMap(const cv::Mat &inPut,cv::Mat &dt,cv::Mat &dtLocation);
     void GetPyraid(const int &nPyraid);
     cv::Point nearstContourP(const cv::Point &p);
-    void ComputePosterior(const std::vector<Region>& rg);
-	void ComputePosteriorPyramid(const std::vector<Region>& rg);
+    void ComputePosterior(const cv::Mat &inputImg,const std::vector<Region>& rg);
 
 	void ComputePosterior(const cv::Mat &inPutImg,const std::vector<Region>& rg,cv::Mat &fw_posterior,cv::Mat &bg_posterior);
 };

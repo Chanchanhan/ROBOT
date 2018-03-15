@@ -59,6 +59,7 @@ void Model::getContourPointsAndIts3DPoints(Sophus::SE3d &pose, std::vector<cv::P
                       {-1, -1}};
     cv::Mat extrinsic(4, 4, CV_32FC1);
     extrinsic = Se2cvf(pose);
+    LOG(INFO)<<"pose "<<pose.log();
     for (int i = 0; i < contour.size(); ++i) {
         for (int j = 0; j < 9; j++) {
             int value = img1.at<int>(contour[i].y + near[j][0], contour[i].x + near[j][1]);
@@ -66,14 +67,22 @@ void Model::getContourPointsAndIts3DPoints(Sophus::SE3d &pose, std::vector<cv::P
 //              img1.at<int>(contour[i].y+near[j][0],contour[i].x+near[j][1])=0;
                 cv::Point3d pt3d(visible_Xs.at<float>(0, value - 1), visible_Xs.at<float>(1, value - 1),
                                  visible_Xs.at<float>(2, value - 1));
-                verticesContour_Xs.push_back(pt3d);
-                verticesContour_xs.push_back(X_to_x(pt3d, extrinsic,iLevel));
+
+                cv::Point2d pt2d=X_to_x(pt3d, extrinsic,iLevel);
+                if(pointInFrame(pt2d,iLevel)){
+                    verticesContour_Xs.push_back(pt3d);
+                    verticesContour_xs.push_back(pt2d);
+//                    LOG(INFO)<<"pt3d : "<<pt3d;
+//
+//                    LOG(INFO)<<"pt2d : "<<pt2d;
+                }
                 break;
             }
         }
     }
     int totalN = verticesContour_xs.size();
     if (totalN <= g_Config.TK_VER_NUMBER) {
+        LOG(WARNING)<<"totalN <= g_Config.TK_VER_NUMBER";
         return;
     }
     int *randoms = new int[totalN];

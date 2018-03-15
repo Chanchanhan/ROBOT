@@ -3,23 +3,37 @@
 //
 
 #include "MySolver.h"
+
+MySolver::MySolver(cv::Mat &intrinsic){
+    option.max_iterations=5;
+    option.lamda=1;
+    option.energyLittle=0.1;
+    option.energyOK=30;
+    option.lamdaSmaller=0.1;
+    option.energyTooSmallSize=0.6;
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            K_(i,j) = intrinsic.at<float>(i,j);
+        }
+    }
+}
 void MySolver::Solve(FramePtr cur_frame, const int &iLevel) {
-    double lamda=1;
-    for(int k=0;k<5;k++){
+    for(int k=0;k<option.max_iterations;k++){
+//        LOG(INFO)<<cur_frame->m_pose.log();
+
         Sophus::Vector6d jacobians=Sophus::Vector6d::Zero();
         Sophus::Matrix6d jtjs= Sophus::Matrix6d::Zero();
         Sophus::SE3d initialPose=cur_frame->m_pose;
-        double e_inital=0;
+        double e_inital=Config::configInstance().TK_VER_NUMBER-cur_frame->VerticesNear2ContourX3D.size();
         for (int i = 0; i < cur_frame->VerticesNear2ContourX3D.size(); i++) {
             auto Xi = cur_frame->VerticesNear2ContourX3D[i];
             double energy=0;
             Sophus::Vector6d jac;
-
             if(Evaluate(cur_frame,Xi,energy,jac)){
                 if(std::isnan(energy)) {
                     LOG(WARNING)<<" nan energy";
+                    Evaluate(cur_frame,Xi,energy,jac);
                     continue;
-                    //  Evaluate(cur_frame->m_pose.log(),Xi,energy,jac);
                 }
                 e_inital+=energy;
                 jacobians+=jac;
@@ -27,23 +41,35 @@ void MySolver::Solve(FramePtr cur_frame, const int &iLevel) {
             }
 
         }
-        LOG(INFO)<<" initialPose: \n "<< initialPose.log();
-
-        cur_frame->m_pose = Sophus::SE3d::exp(lamda*jtjs.inverse()*jacobians)*cur_frame->m_pose;
+//        LOG(INFO)<<" initialPose: \n "<< initialPose.log();
+        if(e_inital<option.energyOK) {
+            LOG(INFO)<<"energyOK with : "<<e_inital;
+            return;
+        }
+        Sophus::Vector6d update= option.lamda*jtjs.inverse()*jacobians;
+        if(std::isnan(update[0])){
+            LOG(WARNING)<<" nan update";
+        }
+        cur_frame->m_pose = Sophus::SE3d::exp(update)*cur_frame->m_pose;
+        if(std::isnan(cur_frame->m_pose.log()[0])){
+            LOG(WARNING)<<" nan m_pose";
+        }
         double e_final=0;
-        LOG(INFO)<<" cur_frame->m_pose: \n "<< cur_frame->m_pose.log();
+//        LOG(INFO)<<" cur_frame->m_pose: \n "<< cur_frame->m_pose.log();
 
 
         ComputeEnergy(cur_frame,cur_frame->VerticesNear2ContourX3D,e_final);
-        if(e_inital<e_final){
-            lamda/=10;
-            cur_frame->m_pose = initialPose;
-            LOG(INFO)<<"energy become bigger:  inital = "<<e_inital<<" ,final = "<<e_final;
 
+        if(fabs(e_final-e_inital)<option.energyLittle) break;
+        if(e_inital<e_final||e_final<option.energyTooSmallSize*e_inital){
+            option.lamda*=option.lamdaSmaller;
+            cur_frame->m_pose = initialPose;
+            if(e_inital<e_final)LOG(INFO)<<"energy become bigger:  inital = "<<e_inital<<" ,final = "<<e_final;
+            else  LOG(INFO)<<"energy become too small :  inital = "<<e_inital<<" ,final = "<<e_final;
             // break;
         }
         else {
-            lamda=1;
+            option.lamda=1;
             LOG(INFO)<<"energy become smaller:  inital = "<<e_inital<<" ,final = "<<e_final;
         }
     }
@@ -65,6 +91,12 @@ void MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
     Sophus::Vector3d X_Camera_coord = m_pose * Xis;
     Sophus::Vector3d x3 = K_ * X_Camera_coord;
     cv::Point x_plane(x3(0) / x3(2), x3(1) / x3(2));
+//    LOG(INFO)<<"X_(Solver): "<<X_;
+//    LOG(INFO)<<"x_plane(Solver): "<<x_plane;
+    if(x_plane.x<0||x_plane.y<0||x_plane.x>=cur_frame->fw_posterior.rows||x_plane.y>=cur_frame->fw_posterior.cols){
+        energy=100;
+        return;
+    }
     auto Theta_x = (double) (cur_frame->dt.at<float>(x_plane));
 
     const int b=Config::configInstance().SV_HE_b;
@@ -121,9 +153,9 @@ bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
     j_X_Lie(1, 5) = -gConfig.FY * _x_in_Camera / _z_in_Camera;
 
     j_Phi_x(0, 0) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x + 1, x_plane.y)) -
-            cur_frame->dt.at<float>(cv::Point(x_plane.x - 1, x_plane.y)));
+                            cur_frame->dt.at<float>(cv::Point(x_plane.x - 1, x_plane.y)));
     j_Phi_x(0, 1) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y + 1)) -
-            cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y - 1)));
+                            cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y - 1)));
     Eigen::MatrixXd jacTmp = left * j_Phi_x * j_X_Lie;
 
     for(int i=0;i<6;i++)
@@ -136,6 +168,7 @@ bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
     if(std::isnan(energy)){
         LOG(INFO)<<"energy is nan";
     }
+//    double He = M_1_PI*(-atan(b*Theta_x)+M_PI_2);
 
     energy = (-log(He * cur_frame->fw_posterior.at<double>(x_plane) + (1 - He) * cur_frame->bg_posterior.at<double>(x_plane))) ;
 

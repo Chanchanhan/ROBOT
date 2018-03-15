@@ -6,6 +6,9 @@
 #include <fstream>
 #include <glog/logging.h>
 #include "OcvYamlConfig.h"
+
+#define PROJECT_WITH_GT
+
 class Config
 {
 public:
