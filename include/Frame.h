@@ -27,6 +27,7 @@ public:
 	std::vector<cv::Point2d> VerticesNear2ContourX2D;
     std::vector<cv::Point3d> VerticesNear2ContourX3D;
 	std::vector<cv::Point> contourX2D;
+	std::vector<cv::Point> gt_contourX2D;
 
     double fw_prior;
     double bg_prior;

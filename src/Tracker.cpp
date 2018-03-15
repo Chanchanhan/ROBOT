@@ -37,29 +37,31 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         model_.getContourPointsAndIts3DPoints(
                 cur_frame->gt_Pose,cur_frame_->VerticesNear2ContourX3D,
                 cur_frame_->VerticesNear2ContourX2D,
-                cur_frame_->contourX2D,iLevel);
-#else
+                cur_frame_->gt_contourX2D,iLevel);
+
+#endif
+
         model_.getContourPointsAndIts3DPoints(
                 cur_pose_,cur_frame_->VerticesNear2ContourX3D,
                 cur_frame_->VerticesNear2ContourX2D,
                 cur_frame_->contourX2D,iLevel);
-#endif
-
 
         if(cur_frame_->contourX2D.size()==0||cur_frame_->VerticesNear2ContourX3D.size()==0)
             continue;
         cv::Mat segment,boundMap;
         std::vector<cv::Point> contourX2D;
+#ifdef   PROJECT_WITH_GT
+        cur_frame_->Segment(cur_frame_->imgPyramid[iLevel],cur_frame_->gt_contourX2D, cur_frame_->segmentation,cur_frame_->bound_map);
+        last_frame_->Segment(last_frame_->imgPyramid[iLevel],last_frame_->gt_contourX2D, last_frame_->segmentation,last_frame_->bound_map);
+
+#else
         cur_frame_->Segment(cur_frame_->imgPyramid[iLevel],cur_frame_->contourX2D, cur_frame_->segmentation,cur_frame_->bound_map);
         last_frame_->Segment(last_frame_->imgPyramid[iLevel],last_frame_->contourX2D, last_frame_->segmentation,last_frame_->bound_map);
 
-
-#ifdef   PROJECT_WITH_GT
-        model_.getContourPointsAndIts3DPoints(
-                cur_pose_,cur_frame_->VerticesNear2ContourX3D,
-                cur_frame_->VerticesNear2ContourX2D,
-                cur_frame_->contourX2D,iLevel);
 #endif
+
+
+
         std::vector<Region> sample_regions;
         for (auto v:cur_frame_->contourX2D) {
             sample_regions.emplace_back(v,8);

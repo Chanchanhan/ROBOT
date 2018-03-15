@@ -27,19 +27,18 @@ void MySolver::Solve(FramePtr cur_frame, const int &iLevel) {
         Sophus::Vector6d jacobians=Sophus::Vector6d::Zero();
         Sophus::Matrix6d jtjs= Sophus::Matrix6d::Zero();
         Sophus::SE3d initialPose=cur_frame->m_pose;
-        int wrong_point_cnt=0;
+        int initWrongJudgeCnt=0;
         double e_inital=Config::configInstance().TK_VER_NUMBER-cur_frame->VerticesNear2ContourX3D.size();
         for (int i = 0; i < cur_frame->VerticesNear2ContourX3D.size(); i++) {
             auto Xi = cur_frame->VerticesNear2ContourX3D[i];
             double energy=0;
             Sophus::Vector6d jac;
-            bool  judge;
-
+            bool judge;
             if(Evaluate(cur_frame,Xi,energy,jac,judge)){
-                wrong_point_cnt+= (!judge)?1:0;
+                initWrongJudgeCnt+=(!judge)?1:0;
                 if(std::isnan(energy)) {
                     LOG(WARNING)<<" nan energy";
-//                    Evaluate(cur_frame,Xi,energy,jac,judge);
+//                    Evaluate(cur_frame,Xi,energy,jac);
                     continue;
                 }
                 e_inital+=energy;
@@ -64,34 +63,40 @@ void MySolver::Solve(FramePtr cur_frame, const int &iLevel) {
         double e_final=0;
 //        LOG(INFO)<<" cur_frame->m_pose: \n "<< cur_frame->m_pose.log();
 
-
-        ComputeEnergy(cur_frame,cur_frame->VerticesNear2ContourX3D,e_final);
+        int finalWrongJudgeCnt=0;
+        ComputeEnergy(cur_frame,cur_frame->VerticesNear2ContourX3D,e_final,finalWrongJudgeCnt);
 
         if(fabs(e_final-e_inital)<option.energyLittle) break;
-        if(e_inital<e_final||e_final<option.energyTooSmallSize*e_inital||wrong_point_cnt>option.max_wrong_point){
+        if(e_inital<e_final||e_final<option.energyTooSmallSize*e_inital||finalWrongJudgeCnt>initWrongJudgeCnt){
             option.lamda*=option.lamdaSmaller;
             cur_frame->m_pose = initialPose;
             if(e_inital<e_final)LOG(INFO)<<"energy become bigger:  inital = "<<e_inital<<" ,final = "<<e_final;
             else  if(e_final<option.energyTooSmallSize*e_inital)
                 LOG(INFO)<<"energy become too small :  inital = "<<e_inital<<" ,final = "<<e_final;
             else
-                LOG(INFO)<<"wrong_point_cnt too much :"<<wrong_point_cnt<<" , inital = "<<e_inital<<" ,final = "<<e_final;
+                LOG(INFO)<<"finalWrongJudgeCnt too much :"<<finalWrongJudgeCnt<<" , initial WrongJudgeCnt = "
+                         <<initWrongJudgeCnt<<" , inital = "<<e_inital<<" ,final = "<<e_final;
 
             // break;
         }
         else {
-          //  option.lamda=1;
-            LOG(INFO)<<"energy become smaller:  inital = "<<e_inital<<" ,final = "<<e_final<<" wrong_point_cnt = "<<wrong_point_cnt ;
+            //  option.lamda=1;
+
+            LOG(INFO)<<"energy become smaller:  inital = "<<e_inital<<" ,final = "<<e_final<<
+                     " , initial finalWrongJudgeCnt = "<<initWrongJudgeCnt<<", final finalWrongJudgeCnt = "<<finalWrongJudgeCnt ;
         }
     }
 }
-void MySolver::ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum) {
+void MySolver::ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt) {
     energySum=0;
     for (auto Xi: Xs) {
-        ComputeEnergy(cur_frame,Xi,energySum);
+        if(!ComputeEnergy(cur_frame,Xi,energySum)){
+            wrongPointCnt++;
+        }
     }
 }
-void MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, double &energy) {
+
+bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, double &energy) {
     auto m_pose = cur_frame->m_pose;
 
     Sophus::Vector3d Xis;
@@ -105,20 +110,33 @@ void MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
 //    LOG(INFO)<<"X_(Solver): "<<X_;
 //    LOG(INFO)<<"x_plane(Solver): "<<x_plane;
     if(x_plane.x<0||x_plane.y<0||x_plane.x>=cur_frame->fw_posterior.rows||x_plane.y>=cur_frame->fw_posterior.cols){
-        energy=100;
-        return;
+        energy+=100;
+        return false;
     }
     auto Theta_x = (double) (cur_frame->dt.at<float>(x_plane));
 
     double He = M_1_PI*(-atan(option.He_b*Theta_x)+M_PI_2);
-    if(std::isnan(energy))
-        return;
-    energy += (-log(He * cur_frame->fw_posterior.at<double>(x_plane) + (1 - He) * cur_frame->bg_posterior.at<double>(x_plane))) ;
 
+
+
+    energy += (-log(He * cur_frame->fw_posterior.at<double>(x_plane) + (1 - He) * cur_frame->bg_posterior.at<double>(x_plane))) ;
+    if(std::isnan(energy)){
+        energy=1000;
+        return false;
+    }
+    if( cur_frame->bg_posterior.at<double>(x_plane)>0.5 &&He > 0.5){
+        // LOG(WARNING)<<"Wrong judge :  b->f ,  this x energy = "<<energy;
+        return false;
+    }
+    else if( cur_frame->fw_posterior.at<double>(x_plane)>0.5 &&He < 0.5){
+        // LOG(WARNING)<<"Wrong judge :  f->b , this x energy = "<<energy;
+        return false;
+    }
+    return  true;
 }
 bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
                         double &energy,
-                        Sophus::Vector6d &jac,bool &Judge) const {
+                        Sophus::Vector6d &jac,bool &judge) const {
 
 
     auto m_pose =cur_frame->m_pose;
@@ -149,15 +167,17 @@ bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
     double  fwp=cur_frame->bg_posterior.at<double>(x_plane);
 
     if( cur_frame->bg_posterior.at<double>(x_plane)>0.5 &&He > 0.5){
-      //  LOG(WARNING)<<"Wrong judge :  b->f ,  this x energy = "<<energy;
-        Judge=false;
+        // LOG(WARNING)<<"Wrong judge :  b->f ,  this x energy = "<<energy;
+        judge= false;
     }
     else if( cur_frame->fw_posterior.at<double>(x_plane)>0.5 &&He < 0.5){
-        Judge=false;
-       // LOG(WARNING)<<"Wrong judge :  f->b , this x energy = "<<energy;
+        judge= false;
+
+        // LOG(WARNING)<<"Wrong judge :  f->b , this x energy = "<<energy;
     }else{
-        Judge=true;
-      //  LOG(WARNING)<<"Right judge  , this x energy = "<<energy;
+        judge= true;
+
+        // LOG(WARNING)<<"Right judge  , this x energy = "<<energy;
     }
     Eigen::MatrixXd j_X_Lie(2, 6);
     Eigen::MatrixXd j_Phi_x(1, 2);
