@@ -5,12 +5,15 @@
 #include "MySolver.h"
 
 MySolver::MySolver(cv::Mat &intrinsic){
-    option.max_iterations=5;
+    option.max_iterations=Config::configInstance().SV_MAX_ITERATIONS;
+
+    option.energyOK=Config::configInstance().SV_E_OK;
+    option.energyTooSmallSize=Config::configInstance().SV_E_TOO_SMALL_SIZE;
+    option.He_b=Config::configInstance().SV_HE_b;
+    option.max_wrong_point=Config::configInstance().SV_MAX_WRONG_POINT;
     option.lamda=1;
     option.energyLittle=0.1;
-    option.energyOK=30;
     option.lamdaSmaller=0.1;
-    option.energyTooSmallSize=0.6;
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             K_(i,j) = intrinsic.at<float>(i,j);
@@ -24,15 +27,19 @@ void MySolver::Solve(FramePtr cur_frame, const int &iLevel) {
         Sophus::Vector6d jacobians=Sophus::Vector6d::Zero();
         Sophus::Matrix6d jtjs= Sophus::Matrix6d::Zero();
         Sophus::SE3d initialPose=cur_frame->m_pose;
+        int wrong_point_cnt=0;
         double e_inital=Config::configInstance().TK_VER_NUMBER-cur_frame->VerticesNear2ContourX3D.size();
         for (int i = 0; i < cur_frame->VerticesNear2ContourX3D.size(); i++) {
             auto Xi = cur_frame->VerticesNear2ContourX3D[i];
             double energy=0;
             Sophus::Vector6d jac;
-            if(Evaluate(cur_frame,Xi,energy,jac)){
+            bool  judge;
+
+            if(Evaluate(cur_frame,Xi,energy,jac,judge)){
+                wrong_point_cnt+= (!judge)?1:0;
                 if(std::isnan(energy)) {
                     LOG(WARNING)<<" nan energy";
-                    Evaluate(cur_frame,Xi,energy,jac);
+//                    Evaluate(cur_frame,Xi,energy,jac,judge);
                     continue;
                 }
                 e_inital+=energy;
@@ -61,16 +68,20 @@ void MySolver::Solve(FramePtr cur_frame, const int &iLevel) {
         ComputeEnergy(cur_frame,cur_frame->VerticesNear2ContourX3D,e_final);
 
         if(fabs(e_final-e_inital)<option.energyLittle) break;
-        if(e_inital<e_final||e_final<option.energyTooSmallSize*e_inital){
+        if(e_inital<e_final||e_final<option.energyTooSmallSize*e_inital||wrong_point_cnt>option.max_wrong_point){
             option.lamda*=option.lamdaSmaller;
             cur_frame->m_pose = initialPose;
             if(e_inital<e_final)LOG(INFO)<<"energy become bigger:  inital = "<<e_inital<<" ,final = "<<e_final;
-            else  LOG(INFO)<<"energy become too small :  inital = "<<e_inital<<" ,final = "<<e_final;
+            else  if(e_final<option.energyTooSmallSize*e_inital)
+                LOG(INFO)<<"energy become too small :  inital = "<<e_inital<<" ,final = "<<e_final;
+            else
+                LOG(INFO)<<"wrong_point_cnt too much :"<<wrong_point_cnt<<" , inital = "<<e_inital<<" ,final = "<<e_final;
+
             // break;
         }
         else {
-            option.lamda=1;
-            LOG(INFO)<<"energy become smaller:  inital = "<<e_inital<<" ,final = "<<e_final;
+          //  option.lamda=1;
+            LOG(INFO)<<"energy become smaller:  inital = "<<e_inital<<" ,final = "<<e_final<<" wrong_point_cnt = "<<wrong_point_cnt ;
         }
     }
 }
@@ -99,8 +110,7 @@ void MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
     }
     auto Theta_x = (double) (cur_frame->dt.at<float>(x_plane));
 
-    const int b=Config::configInstance().SV_HE_b;
-    double He = M_1_PI*(-atan(b*Theta_x)+M_PI_2);
+    double He = M_1_PI*(-atan(option.He_b*Theta_x)+M_PI_2);
     if(std::isnan(energy))
         return;
     energy += (-log(He * cur_frame->fw_posterior.at<double>(x_plane) + (1 - He) * cur_frame->bg_posterior.at<double>(x_plane))) ;
@@ -108,7 +118,7 @@ void MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
 }
 bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
                         double &energy,
-                        Sophus::Vector6d &jac) const {
+                        Sophus::Vector6d &jac,bool &Judge) const {
 
 
     auto m_pose =cur_frame->m_pose;
@@ -123,13 +133,32 @@ bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
     cv::Point x_plane(x3(0) / x3(2), x3(1) / x3(2));
     auto Theta_x = (double) (cur_frame->dt.at<float>(x_plane));
 
-    const int b=Config::configInstance().SV_HE_b;
-    double He = M_1_PI*(-atan(b*Theta_x)+M_PI_2);
-    double phi = -M_1_PI*b/(1+b*b*Theta_x*Theta_x);
+    double He = M_1_PI*(-atan(option.He_b*Theta_x)+M_PI_2);
+    double phi = -M_1_PI*option.He_b/(1+option.He_b*option.He_b*Theta_x*Theta_x);
+
     double left =  phi* (cur_frame->fw_posterior.at<double>(x_plane) - cur_frame->bg_posterior.at<double>(x_plane)) /
                    (He * cur_frame->fw_posterior.at<double>(x_plane) + (1 - He) * cur_frame->bg_posterior.at<double>(x_plane));
+    energy = -log(
+            He * cur_frame->fw_posterior.at<double>(x_plane) +
+            (1 - He) * cur_frame->bg_posterior.at<double>(x_plane)) ;
 
+    if(std::isnan(energy)){
+        LOG(INFO)<<"energy is nan";
+        return false;
+    }
+    double  fwp=cur_frame->bg_posterior.at<double>(x_plane);
 
+    if( cur_frame->bg_posterior.at<double>(x_plane)>0.5 &&He > 0.5){
+      //  LOG(WARNING)<<"Wrong judge :  b->f ,  this x energy = "<<energy;
+        Judge=false;
+    }
+    else if( cur_frame->fw_posterior.at<double>(x_plane)>0.5 &&He < 0.5){
+        Judge=false;
+       // LOG(WARNING)<<"Wrong judge :  f->b , this x energy = "<<energy;
+    }else{
+        Judge=true;
+      //  LOG(WARNING)<<"Right judge  , this x energy = "<<energy;
+    }
     Eigen::MatrixXd j_X_Lie(2, 6);
     Eigen::MatrixXd j_Phi_x(1, 2);
 
@@ -160,17 +189,18 @@ bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
 
     for(int i=0;i<6;i++)
     {
+        if(std::isnan(jacTmp(0,i))){
+            return  false;
+        }
         jac[i]=jacTmp(0,i);
     }
 //    LOG(INFO)<<"left = "<<left;
 //    LOG(INFO)<<"j_Phi_x = "<<j_Phi_x;
 //    LOG(INFO)<<"j_X_Lie = "<<j_X_Lie;
-    if(std::isnan(energy)){
-        LOG(INFO)<<"energy is nan";
-    }
+
+
 //    double He = M_1_PI*(-atan(b*Theta_x)+M_PI_2);
 
-    energy = (-log(He * cur_frame->fw_posterior.at<double>(x_plane) + (1 - He) * cur_frame->bg_posterior.at<double>(x_plane))) ;
 
     return true;
 }

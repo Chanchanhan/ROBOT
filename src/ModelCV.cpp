@@ -13,6 +13,9 @@ using namespace cv;
 
 void Model::getContourPointsAndIts3DPoints(Sophus::SE3d &pose, std::vector<cv::Point3d> &verticesContour_Xs,
                                            std::vector<cv::Point2d> &verticesContour_xs,std::vector<cv::Point> &resContour,const int iLevel) {
+    verticesContour_Xs.resize(0);
+    verticesContour_xs.resize(0);
+    resContour.resize(0);
     cv::Mat visible_Xs, visible_xs;
     getVisualableVertices(pose, visible_Xs);
 
@@ -59,7 +62,7 @@ void Model::getContourPointsAndIts3DPoints(Sophus::SE3d &pose, std::vector<cv::P
                       {-1, -1}};
     cv::Mat extrinsic(4, 4, CV_32FC1);
     extrinsic = Se2cvf(pose);
-    LOG(INFO)<<"pose "<<pose.log();
+//    LOG(INFO)<<"pose "<<pose.log();
     for (int i = 0; i < contour.size(); ++i) {
         for (int j = 0; j < 9; j++) {
             int value = img1.at<int>(contour[i].y + near[j][0], contour[i].x + near[j][1]);
@@ -85,19 +88,20 @@ void Model::getContourPointsAndIts3DPoints(Sophus::SE3d &pose, std::vector<cv::P
         LOG(WARNING)<<"totalN <= g_Config.TK_VER_NUMBER";
         return;
     }
+    int base = totalN/g_Config.TK_VER_NUMBER;
     int *randoms = new int[totalN];
     for (int i = 0; i < totalN; i++) {
         randoms[i] = i;
     }
-//    srand((int)time(0));
     for (int i = 0; i < totalN; i++) {
         std::swap(randoms[i], randoms[i + rand() % (totalN - i)]);
     }
     std::vector<cv::Point3d> resVerticesContour_Xs(g_Config.TK_VER_NUMBER);
     std::vector<cv::Point2d> resVerticesContour_xs(g_Config.TK_VER_NUMBER);
+
     for (int i = 0; i < g_Config.TK_VER_NUMBER; i++) {
-        resVerticesContour_Xs[i] = verticesContour_Xs[randoms[i]];
-        resVerticesContour_xs[i] = verticesContour_xs[randoms[i]];
+        resVerticesContour_Xs[i] = verticesContour_Xs[i*base+randoms[i]%base];
+        resVerticesContour_xs[i] = verticesContour_xs[i*base+randoms[i]%base];
     }
     verticesContour_Xs = resVerticesContour_Xs;
     verticesContour_xs = resVerticesContour_xs;
@@ -188,8 +192,6 @@ void Model::getVisualableVertices(Sophus::SE3d &pose, cv::Mat& vis_vertices) {
                 model_->lines[model_->triangles[i].lindices[2]].e2 = 1;
             else
                 model_->lines[model_->triangles[i].lindices[2]].e1 = 1;
-
-
         }
     }
 

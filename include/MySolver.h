@@ -22,7 +22,8 @@ class MySolver {
         double lamdaSmaller;
         double energyOK;
         double energyLittle;
-
+        double He_b;
+        int max_wrong_point;
         double energyTooSmallSize;
         double stepTooBigSize;
 
@@ -35,13 +36,14 @@ public:
 private:
     bool Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
                   double &energy,
-                  Sophus::Vector6d &jac) const ;
+                  Sophus::Vector6d &jac,bool &Judge) const ;
 
     void ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum);
 
     void ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, double &energy);
 private:
     Option option;
+
     Sophus::Matrix3d K_;
 };
 
