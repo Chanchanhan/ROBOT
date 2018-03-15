@@ -12,7 +12,7 @@ using namespace std;
 using namespace ceres;
 
 void Tracker::init(const OcvYamlConfig& ocvYamlConfig) {
-    model_.loadObj(Config::configInstance().objFile);
+    model_.LoadObj(Config::configInstance().objFile);
 }
 
 void Tracker::ProcessFirstFrame(FramePtr cur_frame)
@@ -34,17 +34,17 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
     }
     for(int iLevel=Config::configInstance().IMG_PYR_NUMBER-1;iLevel>=0;iLevel--){
 #ifdef   PROJECT_WITH_GT
-        model_.getContourPointsAndIts3DPoints(
-                cur_frame->gt_Pose,cur_frame_->VerticesNear2ContourX3D,
+        model_.GetContourPointsAndIts3DPoints(
+                cur_frame->gt_Pose, cur_frame_->VerticesNear2ContourX3D,
                 cur_frame_->VerticesNear2ContourX2D,
-                cur_frame_->gt_contourX2D,iLevel);
+                cur_frame_->gt_contourX2D, iLevel);
 
 #endif
 
-        model_.getContourPointsAndIts3DPoints(
-                cur_pose_,cur_frame_->VerticesNear2ContourX3D,
+        model_.GetContourPointsAndIts3DPoints(
+                cur_pose_, cur_frame_->VerticesNear2ContourX3D,
                 cur_frame_->VerticesNear2ContourX2D,
-                cur_frame_->contourX2D,iLevel);
+                cur_frame_->contourX2D, iLevel);
 
         if(cur_frame_->contourX2D.size()==0||cur_frame_->VerticesNear2ContourX3D.size()==0)
             continue;
@@ -80,15 +80,21 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         cur_frame_->DTMap();
 
         Mat input = cur_frame_->img.clone();
-        model_.displayCV(cur_frame_->m_pose,{0,255,0},input);
+        model_.DisplayCV(cur_frame_->m_pose, {0, 255, 0}, input);
         imshow("input",input);
         //to solve
         MySolver mySolver(model_.intrinsics[iLevel]);
         mySolver.Solve(cur_frame_, iLevel);
 
+        //draw points
+        Mat drwaPoints= cur_frame_->img.clone();
+        model_.DrawPoints(cur_frame_->m_pose,cur_frame_->VerticesNear2ContourX3D,drwaPoints,iLevel);
+        imshow("drwaPoints",drwaPoints);
 
+
+        //draw out
         Mat out = cur_frame_->img.clone();
-        model_.displayCV(cur_frame_->m_pose,{0,255,0},out);
+        model_.DisplayCV(cur_frame_->m_pose, {0, 255, 0}, out);
         imshow("outPut",out);
         imshow("result",post_map);
         waitKey(0);

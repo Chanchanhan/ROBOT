@@ -12,14 +12,14 @@ Model::Model() {
 
 Model::Model(std::string model_file) {
     model_ = NULL;
-    loadObj(model_file);
+    LoadObj(model_file);
 }
 
 Model::~Model() {
     if(model_)
         glmDelete(model_);
 }
-void Model::setIntrinsic() {
+void Model::SetIntrinsic() {
     const Config &gConfig = Config::configInstance();
     intrinsic=cv::Mat(3,4,CV_32FC1);
     intrinsic.at<float>(0,0)=gConfig.FX;    intrinsic.at<float>(0,1)=0;             intrinsic.at<float>(0,2)=gConfig.CX; intrinsic.at<float>(0,3)=0;
@@ -36,7 +36,7 @@ void Model::setIntrinsic() {
     }
 }
 
-void Model::loadObj(const std::string& filename) {
+void Model::LoadObj(const std::string &filename) {
 
     if (model_)
         glmDelete(model_);
@@ -51,7 +51,7 @@ void Model::loadObj(const std::string& filename) {
         vertices_hom_.at<float>(2, i) = model_->vertices[3 * (i)+2];
         vertices_hom_.at<float>(3, i) = 1;
     }
-    setIntrinsic();
+    SetIntrinsic();
 
 }
 

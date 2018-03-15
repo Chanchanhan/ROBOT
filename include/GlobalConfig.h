@@ -36,6 +36,8 @@ public:
     float SV_E_TOO_SMALL_SIZE ;
     float SV_E_OK ;
     float  SV_HE_b;
+    //debug
+    std::vector<bool> inside;
 public:
 
     static void loadConfig(const OcvYamlConfig &ocvYamlConfig){

@@ -52,7 +52,7 @@ void DataPaser::doTrakingWithVideo()
     LOG(ERROR)<<("Cannot open camera\n");
     return ;    
   }
-    model.loadObj(gConfig.objFile);
+    model.LoadObj(gConfig.objFile);
   cv::Mat img;
   while (videoCapture.read(img))
   {
@@ -65,8 +65,9 @@ void DataPaser::doTrakingWithVideo()
 
       Frame curFrame;
       curFrame.img=img.clone();
-      model.displayCV(pose,cv::Scalar(255,255,0),frameDrawing);
-      model.getContourPointsAndIts3DPoints(pose,curFrame.VerticesNear2ContourX3D,curFrame.VerticesNear2ContourX2D,curFrame.contourX2D);
+      model.DisplayCV(pose, cv::Scalar(255, 255, 0), frameDrawing);
+      model.GetContourPointsAndIts3DPoints(pose, curFrame.VerticesNear2ContourX3D, curFrame.VerticesNear2ContourX2D,
+                                           curFrame.contourX2D);
       if(gConfig.CV_DRAW_FRAME){
 	    cv::imshow("frameDrawing",frameDrawing);
 	    cv::waitKey(1);
