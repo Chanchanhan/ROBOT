@@ -31,7 +31,7 @@ class MySolver {
 public:
     MySolver(){}
     MySolver(cv::Mat &intrinsic);
-    void Solve(FramePtr cur_frame, const int &iLevel = 0);
+    void Solve(FramePtr cur_frame, Model &model, const int &iLevel = 0);
 
 private:
     bool Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,

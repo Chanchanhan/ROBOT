@@ -139,6 +139,23 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
         }
     }
 }
+void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> &Xs, Frame &frame,
+                       const int iLevel) {
+    cv::Mat extrinsic(4, 4, CV_32FC1);
+    extrinsic = Se2cvf(pose);
+    cv::Mat pt_status = frame.fw_posterior > frame.bg_posterior;
+    cv::Mat out = frame.img.clone();
+    for(int i=0;i<Xs.size();i++){
+        auto p2d= X_to_x(Xs[i],extrinsic,iLevel);
+        if(Config::configInstance().pointState[i]){
+//        if(pt_status.at<unsigned char >(p2d)){
+            circle(out,p2d,3,cv::Scalar(0,255,0));
+        }else {
+            circle(out,p2d,3,cv::Scalar(255,0,0));
+        }
+    }
+    imshow("verify",out);
+}
 void Model::DrawOnePoint(const cv::Mat &extrinsic, const cv::Point3d &X,cv::Mat &frame,const cv::Scalar scalar, const int iLevel) {
     auto p2d= X_to_x(X,extrinsic,iLevel);
     circle(frame,p2d,3,scalar);
@@ -275,26 +292,4 @@ std::vector<cv::Point> Model::GetContourAt(Sophus::SE3d &pose) {
         return  {};
     return move(contours[0]);
 }
-//
-//void Model::SampleVertex(FramePtr frame,std::vector<cv::Point3d> &verticesContour_Xs,std::vector<cv::Point2d> &verticesContour_xs)
-//{
-//
-//    auto resContour=frame->contourX2D;
-//    auto pose = frame->gt_Pose;
-//    int near[9][2]={{0,0},{0,-1},{0,1},{-1,0},{1,0},{1,1},{1,-1},{-1,1},{-1,-1}};
-//    cv::Mat extrinsic(4, 4, CV_32FC1);
-//    pose.getExtrinsicMat(extrinsic);
-//    for (int i = 0; i < resContour.size(); ++i){
-//        for(int j=0;j<9;j++){
-//            int value = img1.at<int>(resContour[i].y+near[j][0],resContour[i].x+near[j][1]);
-//            if (value > 0) {
-////              img1.at<int>(contour[i].y+near[j][0],contour[i].x+near[j][1])=0;
-//                cv::Point3d pt3d( visible_Xs.at<float>(0, value - 1), visible_Xs.at<float>(1, value - 1),visible_Xs.at<float>(2, value - 1));
-//                verticesContour_Xs.push_back(pt3d);
-//                verticesContour_xs.push_back(X_to_x(pt3d,extrinsic));
-//                break;
-//            }
-//        }
-//    }
-//    LOG(INFO)<<"verticesContour_xs.size() : "<<verticesContour_xs.size();
-//}
+

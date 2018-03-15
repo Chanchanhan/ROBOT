@@ -3,10 +3,9 @@
 //
 
 #include "MySolver.h"
-
+#include "Model.h"
 MySolver::MySolver(cv::Mat &intrinsic){
     option.max_iterations=Config::configInstance().SV_MAX_ITERATIONS;
-
     option.energyOK=Config::configInstance().SV_E_OK;
     option.energyTooSmallSize=Config::configInstance().SV_E_TOO_SMALL_SIZE;
     option.He_b=Config::configInstance().SV_HE_b;
@@ -20,7 +19,7 @@ MySolver::MySolver(cv::Mat &intrinsic){
         }
     }
 }
-void MySolver::Solve(FramePtr cur_frame, const int &iLevel) {
+void MySolver::Solve(FramePtr cur_frame, Model &model,const int &iLevel) {
 
 
     for(int k=0;k<option.max_iterations;k++){
@@ -73,7 +72,8 @@ void MySolver::Solve(FramePtr cur_frame, const int &iLevel) {
         if(e_inital<e_final||e_final<option.energyTooSmallSize*e_inital||finalWrongJudgeCnt>initWrongJudgeCnt){
             option.lamda*=option.lamdaSmaller;
             cur_frame->m_pose = initialPose;
-            if(e_inital<e_final)LOG(INFO)<<"energy become bigger:  inital = "<<e_inital<<" ,final = "<<e_final;
+            if(e_inital<e_final)
+                LOG(INFO)<<"energy become bigger:  inital = "<<e_inital<<" ,final = "<<e_final;
             else  if(e_final<option.energyTooSmallSize*e_inital)
                 LOG(INFO)<<"energy become too small :  inital = "<<e_inital<<" ,final = "<<e_final;
             else
@@ -85,6 +85,8 @@ void MySolver::Solve(FramePtr cur_frame, const int &iLevel) {
         else {
             //  option.lamda=1;
             Config::configInstance().pointState=pointStateTmp;
+            model.DrawPoints(cur_frame->m_pose,cur_frame->VerticesNear2ContourX3D,*cur_frame,iLevel);
+            LOG(INFO)<<"k_th_tmp = "<<k_th_tmp;
             LOG(INFO)<<"energy become smaller:  inital = "<<e_inital<<" ,final = "<<e_final<<
                      " , initial finalWrongJudgeCnt = "<<initWrongJudgeCnt<<", final finalWrongJudgeCnt = "<<finalWrongJudgeCnt ;
         }
@@ -95,8 +97,8 @@ void MySolver::ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Poin
     k_th_tmp=0;
     pointStateTmp.resize(Xs.size());
 
-    for (auto Xi: Xs) {
-        if(!ComputeEnergy(cur_frame,Xi,energySum)){
+    for (auto Xi =  Xs.begin();Xi != Xs.end();Xi++) {
+        if(!ComputeEnergy(cur_frame,*Xi,energySum)){
             wrongPointCnt++;
         }
 
@@ -119,6 +121,7 @@ bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
 //    LOG(INFO)<<"x_plane(Solver): "<<x_plane;
     if(x_plane.x<0||x_plane.y<0||x_plane.x>=cur_frame->fw_posterior.rows||x_plane.y>=cur_frame->fw_posterior.cols){
         energy+=100;
+        k_th_tmp++;
         return false;
     }
     auto Theta_x = (double) (cur_frame->dt.at<float>(x_plane));
@@ -128,23 +131,23 @@ bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
 
 
     energy += (-log(He * cur_frame->fw_posterior.at<double>(x_plane) + (1 - He) * cur_frame->bg_posterior.at<double>(x_plane))) ;
+
+    if(cur_frame->bg_posterior.at<double>(x_plane)>cur_frame->fw_posterior.at<double>(x_plane)){
+        pointStateTmp[k_th_tmp++]= false;
+    }else
+        pointStateTmp[k_th_tmp++]= true;
     if(std::isnan(energy)){
         energy=1000;
         return false;
     }
     if( cur_frame->bg_posterior.at<double>(x_plane)>0.5 &&He > 0.5){
-        // LOG(WARNING)<<"Wrong judge :  b->f ,  this x energy = "<<energy;
+        LOG(WARNING)<<"Wrong judge :  b->f ,  this x energy = "<<energy;
         return false;
     }
     else if( cur_frame->fw_posterior.at<double>(x_plane)>0.5 &&He < 0.5){
-        // LOG(WARNING)<<"Wrong judge :  f->b , this x energy = "<<energy;
+        LOG(WARNING)<<"Wrong judge :  f->b , this x energy = "<<energy;
         return false;
     }
-    if(cur_frame->bg_posterior.at<double>(x_plane)>cur_frame->fw_posterior.at<double>(x_plane)){
-        pointStateTmp[k_th_tmp++]= false;
-    }else
-        pointStateTmp[k_th_tmp++]= true;
-
 
     return  true;
 }

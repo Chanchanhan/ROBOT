@@ -97,6 +97,7 @@ void Frame::ComputePosterior(const Mat &inputImg,const std::vector<Region>& rg)
             fw_posterior.at<double>(i,j) = segmentation.at<unsigned char>(i,j)>0?1:0;
         }
     }
+
     bg_posterior=1-fw_posterior;
     return;
 #endif
