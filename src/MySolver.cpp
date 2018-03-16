@@ -58,8 +58,8 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
             LOG(INFO)<<"energyOK with : "<<e_inital;
             return;
         }
-        Sophus::Vector6d update= option.lamda*jtjs.inverse()*jacobians;
-//        Sophus::Vector6d update=  option.lamda*jtjs.inverse()*bs;
+        //Sophus::Vector6d update= option.lamda*jtjs.inverse()*jacobians;
+        Sophus::Vector6d update=  option.lamda*jtjs.inverse()*bs;
         if(std::isnan(update[0])){
             LOG(WARNING)<<" nan update";
             break;
@@ -84,7 +84,7 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
         if(fabs(e_final-e_inital)<option.energyLittle){
 
             LOG(INFO)<<"energy change little:  inital = "<<e_inital<<" ,final = "<<e_final;
-            LOG(INFO)<<"update :"<<update;
+//            LOG(INFO)<<"update :"<<update;
             option.lamda/=option.lamdaSmaller;
             continue;
         }
@@ -131,7 +131,7 @@ void MySolver::ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Poin
     }
 }
 void MySolver::ComputeEnergyAndDraw(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt, const bool  _debug,const std::string owner) {
-    LOG(INFO)<<"ComputeEnergyAndDraw";
+//    LOG(INFO)<<"ComputeEnergyAndDraw";
     energySum=0;
     k_th_tmp=0;
     wrongPointCnt=0;

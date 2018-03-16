@@ -173,7 +173,7 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
         }
 
     }
-    LOG(INFO)<<"owner "<<owner<<"'s wrong point Num = "<<wrong;
+//    LOG(INFO)<<"owner "<<owner<<"'s wrong point Num = "<<wrong;
     imshow(owner,out);
 }
 void Model::DrawOnePoint(const cv::Mat &extrinsic, const cv::Point3d &X,cv::Mat &frame,const cv::Scalar scalar, const int iLevel) {
