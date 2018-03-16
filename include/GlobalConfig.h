@@ -36,8 +36,10 @@ public:
     float SV_E_TOO_SMALL_SIZE ;
     float SV_E_OK ;
     float  SV_HE_b;
+    float  SV_LAMDA_b;
     //debug
     std::vector<unsigned char> pointState;
+
 public:
 
     static void loadConfig(const OcvYamlConfig &ocvYamlConfig){
@@ -75,6 +77,8 @@ public:
         //parameters for solvers
         {
             configInstance.SV_HE_b= ocvYamlConfig.value_f("SV_HE_b");
+            configInstance.SV_LAMDA_b= ocvYamlConfig.value_f("SV_LAMDA_b");
+
             configInstance.SV_MAX_WRONG_POINT=std::lround(ocvYamlConfig.value_f("SV_MAX_WRONG_POINT"));
             configInstance.SV_MAX_ITERATIONS=std::lround(ocvYamlConfig.value_f("SV_MAX_ITERATIONS"));
             configInstance.SV_E_TOO_SMALL_SIZE= ocvYamlConfig.value_f("SV_E_TOO_SMALL_SIZE");

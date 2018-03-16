@@ -10,7 +10,7 @@ MySolver::MySolver(cv::Mat &intrinsic){
     option.energyTooSmallSize=Config::configInstance().SV_E_TOO_SMALL_SIZE;
     option.He_b=Config::configInstance().SV_HE_b;
     option.max_wrong_point=Config::configInstance().SV_MAX_WRONG_POINT;
-    option.lamda=1;
+    option.lamda=Config::configInstance().SV_LAMDA_b;
     option.energyLittle=0.1;
     option.lamdaSmaller=0.1;
     for (int i = 0; i < 3; ++i) {
@@ -59,7 +59,7 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
             return;
         }
 //        Sophus::Vector6d update= option.lamda*jtjs.inverse()*jacobians;
-        Sophus::Vector6d update= option.lamda*jtjs.inverse()*bs;
+        Sophus::Vector6d update=  option.lamda*jtjs.inverse()*bs;
         if(std::isnan(update[0])){
             LOG(WARNING)<<" nan update";
             break;
@@ -75,7 +75,13 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
         pointStateTmp.resize(0);
         ComputeEnergy(cur_frame,cur_frame->VerticesNear2ContourX3D,e_final,finalWrongJudgeCnt);
 
-        if(fabs(e_final-e_inital)<option.energyLittle) break;
+        if(fabs(e_final-e_inital)<option.energyLittle){
+
+            LOG(INFO)<<"energy change little:  inital = "<<e_inital<<" ,final = "<<e_final;
+            LOG(INFO)<<"update :"<<update;
+
+            break;
+        }
         if(e_inital<e_final||e_final<option.energyTooSmallSize*e_inital||finalWrongJudgeCnt>initWrongJudgeCnt){
              cur_frame->m_pose = initialPose;
             if(e_inital<e_final)
