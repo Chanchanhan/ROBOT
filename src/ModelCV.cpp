@@ -9,7 +9,20 @@
 
 
 using namespace cv;
+void Model::GetContour(const Sophus::SE3d &pose,std::vector<cv::Point> &resContour, const int iLevel) {
+    resContour.resize(0);
+    std::vector<std::vector<cv::Point>> contours;
+    int weight = Config::configInstance().VIDEO_WIDTH /std:: pow(2,iLevel),
+            height = Config::configInstance().VIDEO_HEIGHT /std:: pow(2,iLevel);
+    cv::Mat line_img = cv::Mat::zeros(height,weight, CV_8UC1);
+    DisplayCV(pose, cv::Scalar(255, 255, 255), line_img, iLevel);
+    cv::findContours(line_img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+    if (contours.size() == 0) {
+        return;
+    }
+    resContour = contours[0];
 
+}
 
 void Model::GetContourPointsAndIts3DPoints(const Sophus::SE3d &pose, std::vector<cv::Point3d> &verticesContour_Xs,
                                            std::vector<cv::Point2d> &verticesContour_xs,
@@ -33,25 +46,13 @@ void Model::GetContourPointsAndIts3DPoints(const Sophus::SE3d &pose, std::vector
             img1.at<int>(pt) = i + 1;
         }
     }
+    GetContour(pose,resContour,iLevel);
 
-    std::vector<std::vector<cv::Point>> contours;
+    if(resContour.empty()) return;
 
-    cv::Mat line_img = cv::Mat::zeros(height,weight, CV_8UC1);
-    DisplayCV(pose, cv::Scalar(255, 255, 255), line_img, iLevel);
-    cv::findContours(line_img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-
-    cv::Mat mask_img = cv::Mat::zeros(height, weight,CV_8UC1);
-    cv::drawContours(mask_img, contours, -1, CV_RGB(255, 255, 255), CV_FILLED);
-  //  cv::imshow("line_img",line_img);
-
-   // cv::imshow("mask_img",mask_img);
    // cv::waitKey(0);
     /***to map X-x***/
-    if (contours.size() == 0) {
-        return;
-    }
-    std::vector<cv::Point> &contour = contours[0];
-    resContour = contours[0];
+
     int near[9][2] = {{0,  0},
                       {0,  -1},
                       {0,  1},
@@ -64,9 +65,9 @@ void Model::GetContourPointsAndIts3DPoints(const Sophus::SE3d &pose, std::vector
     cv::Mat extrinsic(4, 4, CV_32FC1);
     extrinsic = Se2cvf(pose);
 //    LOG(INFO)<<"pose "<<pose.log();
-    for (int i = 0; i < contour.size(); ++i) {
+    for (int i = 0; i < resContour.size(); ++i) {
         for (int j = 0; j < 9; j++) {
-            int value = img1.at<int>(contour[i].y + near[j][0], contour[i].x + near[j][1]);
+            int value = img1.at<int>(resContour[i].y + near[j][0], resContour[i].x + near[j][1]);
             if (value > 0) {
 //              img1.at<int>(contour[i].y+near[j][0],contour[i].x+near[j][1])=0;
                 cv::Point3d pt3d(visible_Xs.at<float>(0, value - 1), visible_Xs.at<float>(1, value - 1),
@@ -108,7 +109,7 @@ void Model::GetContourPointsAndIts3DPoints(const Sophus::SE3d &pose, std::vector
     }
     verticesContour_Xs = resVerticesContour_Xs;
     verticesContour_xs = resVerticesContour_xs;
-    delete randoms;
+    delete[] randoms;
 //    LOG(INFO)<<"verticesContour_Xs : "<<verticesContour_Xs.size();
 }
 
@@ -149,21 +150,30 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
     extrinsic = Se2cvf(pose);
     cv::Mat pt_status = frame.fw_posterior > frame.bg_posterior;
     cv::Mat out = frame.img.clone();
+   // DisplayCV(pose, cv::Scalar(0,0,0),out,iLevel);
+
+    int wrong=0;
     for(int i=0;i<Xs.size();i++){
         auto p2d= X_to_x(Xs[i],extrinsic,iLevel);
         switch (Config::configInstance().pointState[i]){
             case 0:
+                wrong++;
                 circle(out,p2d,3,cv::Scalar(255,0,0));//b->f ,蓝色
                 break;
             case 1:
-                circle(out,p2d,3,cv::Scalar(0,255,0));//f->b ,黄色
+                wrong++;
+                circle(out,p2d,3,cv::Scalar(0,255,0));//f->b ,绿色
                 break;
             case 2:
-                circle(out,p2d,3,cv::Scalar(0,0,255));//判断正确，红色点
+                circle(out,p2d,3,cv::Scalar(0,0,255));//判断正确，内点，红色点
+                break;
+            case 3:
+                circle(out,p2d,3,cv::Scalar(255,255,255));//判断正确，外点，白色点
                 break;
         }
 
     }
+    LOG(INFO)<<"owner "<<owner<<"'s wrong point Num = "<<wrong;
     imshow(owner,out);
 }
 void Model::DrawOnePoint(const cv::Mat &extrinsic, const cv::Point3d &X,cv::Mat &frame,const cv::Scalar scalar, const int iLevel) {

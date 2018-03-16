@@ -48,8 +48,7 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
 
         if(cur_frame_->contourX2D.size()==0||cur_frame_->VerticesNear2ContourX3D.size()==0)
             continue;
-        cv::Mat segment,boundMap;
-        std::vector<cv::Point> contourX2D;
+
 #ifdef   PROJECT_WITH_GT
         cur_frame_->Segment(cur_frame_->imgPyramid[iLevel],cur_frame_->gt_contourX2D, cur_frame_->segmentation,cur_frame_->bound_map);
         last_frame_->Segment(last_frame_->imgPyramid[iLevel],last_frame_->gt_contourX2D, last_frame_->segmentation,last_frame_->bound_map);
@@ -76,8 +75,12 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
 
         Mat post_map = cur_frame_->fw_posterior > cur_frame_->bg_posterior;
 
+#ifdef   PROJECT_WITH_GT
+        cur_frame_->Segment(cur_frame_->imgPyramid[iLevel],cur_frame_->contourX2D, cur_frame_->segmentation,cur_frame_->bound_map);
+        last_frame_->Segment(last_frame_->imgPyramid[iLevel],last_frame_->contourX2D, last_frame_->segmentation,last_frame_->bound_map);
 
-        cur_frame_->DTMap();
+#endif
+        cur_frame_->UpdateDTMap();
 
         Mat input = cur_frame_->img.clone();
         model_.DisplayCV(cur_frame_->m_pose, {0, 255, 0}, input);

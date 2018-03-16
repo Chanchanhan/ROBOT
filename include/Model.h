@@ -23,6 +23,7 @@ public:
 
     bool PointInFrame(const cv::Point &p, const int iLevel = 0);
 
+    void GetContour(const Sophus::SE3d &pose,std::vector<cv::Point> &resContour, const int iLevel);
     void GetContourPointsAndIts3DPoints(const Sophus::SE3d &pose, std::vector<cv::Point3d> &verticesContour_Xs,
                                         std::vector<cv::Point2d> &verticesContour_xs,
                                         std::vector<cv::Point> &resContour,
