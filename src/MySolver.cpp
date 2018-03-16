@@ -19,7 +19,7 @@ MySolver::MySolver(cv::Mat &intrinsic){
         }
     }
 }
-void MySolver::Solve(FramePtr cur_frame, Model &model,const int &iLevel) {
+void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
 
 
     for(int k=0;k<option.max_iterations;k++){
@@ -84,29 +84,42 @@ void MySolver::Solve(FramePtr cur_frame, Model &model,const int &iLevel) {
         }
         else {
             //  option.lamda=1;
+            ComputeEnergyAndDraw(cur_frame,cur_frame->VerticesNear2ContourX3D,e_final,finalWrongJudgeCnt,1);
             Config::configInstance().pointState=pointStateTmp;
-            model.DrawPoints(cur_frame->m_pose,cur_frame->VerticesNear2ContourX3D,*cur_frame,iLevel);
+            ComputeEnergy(cur_frame,cur_frame->VerticesNear2ContourX3D,e_final,finalWrongJudgeCnt);
             LOG(INFO)<<"k_th_tmp = "<<k_th_tmp;
             LOG(INFO)<<"energy become smaller:  inital = "<<e_inital<<" ,final = "<<e_final<<
                      " , initial finalWrongJudgeCnt = "<<initWrongJudgeCnt<<", final finalWrongJudgeCnt = "<<finalWrongJudgeCnt ;
         }
     }
 }
-void MySolver::ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt) {
+void MySolver::ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt, const bool  _debug) {
     energySum=0;
     k_th_tmp=0;
     pointStateTmp.resize(Xs.size());
 
     for (auto Xi =  Xs.begin();Xi != Xs.end();Xi++) {
-        if(!ComputeEnergy(cur_frame,*Xi,energySum)){
+        if(!ComputeEnergy(cur_frame,*Xi,energySum,_debug)){
             wrongPointCnt++;
         }
 
 
     }
 }
-
-bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, double &energy) {
+void MySolver::ComputeEnergyAndDraw(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt, const bool  _debug) {
+    LOG(INFO)<<"ComputeEnergyAndDraw";
+    energySum=0;
+    k_th_tmp=0;
+    pointStateTmp.resize(Xs.size());
+    Config::configInstance().pointState=pointStateTmp;
+    for (auto Xi =  Xs.begin();Xi != Xs.end();Xi++) {
+        if(!ComputeEnergy(cur_frame,*Xi,energySum,_debug)){
+            wrongPointCnt++;
+        }
+    }
+    model->DrawPoints(cur_frame->m_pose,Xs,*cur_frame,0);
+}
+bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, double &energy, const bool  _debug) {
     auto m_pose = cur_frame->m_pose;
 
     Sophus::Vector3d Xis;
@@ -130,24 +143,25 @@ bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
 
 
 
-    energy += (-log(He * cur_frame->fw_posterior.at<double>(x_plane) + (1 - He) * cur_frame->bg_posterior.at<double>(x_plane))) ;
-
+    double x_energy = (-log(He * cur_frame->fw_posterior.at<double>(x_plane) + (1 - He) * cur_frame->bg_posterior.at<double>(x_plane))) ;
+    energy+=x_energy;
     if(cur_frame->bg_posterior.at<double>(x_plane)>cur_frame->fw_posterior.at<double>(x_plane)){
         pointStateTmp[k_th_tmp++]= false;
     }else
         pointStateTmp[k_th_tmp++]= true;
-    if(std::isnan(energy)){
-        energy=1000;
+    if(std::isnan(x_energy)){
+        x_energy=100;
         return false;
     }
     if( cur_frame->bg_posterior.at<double>(x_plane)>0.5 &&He > 0.5){
-        LOG(WARNING)<<"Wrong judge :  b->f ,  this x energy = "<<energy;
+      if(_debug)  LOG(WARNING)<<"Wrong judge :  b->f ,  this x energy = "<<x_energy;
         return false;
     }
     else if( cur_frame->fw_posterior.at<double>(x_plane)>0.5 &&He < 0.5){
-        LOG(WARNING)<<"Wrong judge :  f->b , this x energy = "<<energy;
+        if(_debug) LOG(WARNING)<<"Wrong judge :  f->b , this x energy = "<<x_energy;
         return false;
     }
+    if(_debug) LOG(WARNING)<<"Right judge : this x energy = "<<x_energy;
 
     return  true;
 }

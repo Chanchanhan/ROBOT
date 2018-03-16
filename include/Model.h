@@ -30,7 +30,7 @@ public:
     void DisplayCV(const Sophus::SE3d &pose, const cv::Scalar &color, cv::Mat &frame, const int iLevel = 0);
     void DrawPoints(const Sophus::SE3d &pose,const  std::vector<cv::Point3d> &Xs,cv::Mat &frame,const int iLevel=0);
     void DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> &Xs, Frame &frame,
-                    const int iLevel);
+                    const int iLevel=0);
 public:
     cv::Mat intrinsic;
     std::vector<cv::Mat> intrinsics;

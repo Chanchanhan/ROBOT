@@ -84,9 +84,10 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         imshow("input",input);
         //to solve
         MySolver mySolver(model_.intrinsics[iLevel]);
-        mySolver.Solve(cur_frame_, model_,iLevel);
+        mySolver.model = &model_;
+        mySolver.Solve(cur_frame_,iLevel);
         //draw points
-        model_.DrawPoints(cur_frame_->m_pose,cur_frame_->VerticesNear2ContourX3D,*cur_frame_,iLevel);
+     //   model_.DrawPoints(cur_frame_->m_pose,cur_frame_->VerticesNear2ContourX3D,*cur_frame_,iLevel);
 
 
         //draw out

@@ -129,6 +129,8 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
                        const int iLevel) {
     cv::Mat extrinsic(4, 4, CV_32FC1);
     extrinsic = Se2cvf(pose);
+    cv::Mat out = frame.clone();
+
     for(int i=0;i<Xs.size();i++){
         if(Config::configInstance().pointState[i]){
             DrawOnePoint(extrinsic,Xs[i],frame,cv::Scalar(0,0,255), iLevel);//inside
@@ -138,6 +140,8 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
 
         }
     }
+    imshow("verify",out);
+
 }
 void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> &Xs, Frame &frame,
                        const int iLevel) {
