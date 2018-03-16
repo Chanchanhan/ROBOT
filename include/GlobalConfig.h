@@ -37,7 +37,7 @@ public:
     float SV_E_OK ;
     float  SV_HE_b;
     //debug
-    std::vector<bool> pointState;
+    std::vector<unsigned char> pointState;
 public:
 
     static void loadConfig(const OcvYamlConfig &ocvYamlConfig){

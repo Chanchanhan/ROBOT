@@ -144,21 +144,27 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
 
 }
 void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> &Xs, Frame &frame,
-                       const int iLevel) {
+                       const std::string owner,const int iLevel) {
     cv::Mat extrinsic(4, 4, CV_32FC1);
     extrinsic = Se2cvf(pose);
     cv::Mat pt_status = frame.fw_posterior > frame.bg_posterior;
     cv::Mat out = frame.img.clone();
     for(int i=0;i<Xs.size();i++){
         auto p2d= X_to_x(Xs[i],extrinsic,iLevel);
-        if(Config::configInstance().pointState[i]){
-//        if(pt_status.at<unsigned char >(p2d)){
-            circle(out,p2d,3,cv::Scalar(0,255,0));
-        }else {
-            circle(out,p2d,3,cv::Scalar(255,0,0));
+        switch (Config::configInstance().pointState[i]){
+            case 0:
+                circle(out,p2d,3,cv::Scalar(255,0,0));//b->f ,蓝色
+                break;
+            case 1:
+                circle(out,p2d,3,cv::Scalar(0,255,0));//f->b ,黄色
+                break;
+            case 2:
+                circle(out,p2d,3,cv::Scalar(0,0,255));//判断正确，红色点
+                break;
         }
+
     }
-    imshow("verify",out);
+    imshow(owner,out);
 }
 void Model::DrawOnePoint(const cv::Mat &extrinsic, const cv::Point3d &X,cv::Mat &frame,const cv::Scalar scalar, const int iLevel) {
     auto p2d= X_to_x(X,extrinsic,iLevel);
