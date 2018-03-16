@@ -46,9 +46,9 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
 //                    Evaluate(cur_frame,Xi,energy,jac);
                     continue;
                 }
-                bs=jac*energy;
+//                bs=jac;
                 e_inital+=energy;
-                jac *= energy;
+//                jac *= energy;
                 jacobians+=jac;
                 jtjs+=jac*jac.transpose();
             }
@@ -60,7 +60,7 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
             return;
         }
         //Sophus::Vector6d update= option.lamda*jtjs.inverse()*jacobians;
-        Sophus::Vector6d update=  option.lamda*jtjs.inverse()*bs;
+        Sophus::Vector6d update=  -option.lamda*jtjs.inverse()*jacobians;
         if(std::isnan(update[0])){
             LOG(WARNING)<<" nan update";
             break;
