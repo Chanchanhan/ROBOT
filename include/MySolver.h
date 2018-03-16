@@ -40,12 +40,13 @@ private:
                   Sophus::Vector6d &jac,bool &judge) const ;
 
     void ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt,const bool _debug=0);
-    void ComputeEnergyAndDraw(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt,const bool _debug=0);
+    void ComputeEnergyAndDraw(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs,
+                              double &energySum,int &wrongPointCnt,const bool _debug=0,const std::string owner="");
 
     bool ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, double &energy,const bool _debug=0);
 private:
     Option option;
-    std::vector<bool> pointStateTmp;
+    std::vector<unsigned char> pointStateTmp;
     int k_th_tmp;
     Sophus::Matrix3d K_;
 };

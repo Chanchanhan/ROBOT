@@ -32,7 +32,7 @@ void Frame::GetPyraid(const int &nPyraid) {
     }
 }
 
-void Frame::DTMap() {
+void Frame::UpdateDTMap() {
 
     vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);
     cv::Mat dt1(this->bound_map.size(),CV_32FC1),dt2(this->bound_map.size(),CV_32FC1);
@@ -43,29 +43,23 @@ void Frame::DTMap() {
 
     this->dt= dt2-dt1;
 
-//    for(int i=0;i<dt1.rows;i++){
-//        for(int j=0;j<dt1.cols;j++){
-//            if(dt2.at<float>(i,j)==0&&dt1.at<float>(i,j)!=0){
-//              //  LOG(WARNING)<<"ddt2.at<float>(i,j)==0&&ddt1.at<float>(i,j)!=0"<<endl;
-//                LOG(WARNING)<<this->dt.at<double>(i,j)<<endl;
-//            }
-//        }
-//    }
-
-    // normalize(this->dt,this->dt,1.0,-1.0,NORM_INF);
-    // this->dt/=255;
-
-
-
-    //  cout<<"dt = "<<dt;
 
 }
-void Frame::DTMap(const cv::Mat &inPut,cv::Mat &dt,cv::Mat &dtLocation) {
-    vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);
-    //distanceTransform(this->bound_map,dt,dtLocation,weights);/// it's wired
-    distanceTransform(inPut,dt,dtLocation,weights);/// it's wired
 
-    //  imshow("dt",dt);
+void Frame::UpdateDTMap(const std::vector<cv::Point> &contourX2D) {
+    vector<vector<Point>> contours;
+    contours.push_back(contourX2D);
+    cv::drawContours(bound_map, contours,-1, Scalar(255), CV_FILLED);
+
+    cv::Mat dt1(this->bound_map.size(),CV_32FC1),dt2(this->bound_map.size(),CV_32FC1);
+    this->dt= cv::Mat(this->bound_map.size(),CV_32FC1);
+    cv::distanceTransform(this->bound_map,dt1,CV_DIST_L2,3);//inside
+    cv::distanceTransform(255-this->bound_map,dt2,CV_DIST_L2,3);//outside
+
+
+    this->dt= dt2-dt1;
+
+
 }
 cv::Point Frame::nearstContourP(const cv::Point &point) {
     int x= point.y;

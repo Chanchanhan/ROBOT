@@ -37,7 +37,8 @@ public:
 	void Segment();
 	void Segment(const cv::Mat &inPutImg,const std::vector<cv::Point> &contourX2D,cv::Mat &segmentation,cv::Mat &bound_map);
 
-	void DTMap();
+	void UpdateDTMap();
+	void UpdateDTMap(const std::vector<cv::Point> &contourX2D);
     void DTMap(const cv::Mat &inPut,cv::Mat &dt,cv::Mat &dtLocation);
     void GetPyraid(const int &nPyraid);
     cv::Point nearstContourP(const cv::Point &p);
