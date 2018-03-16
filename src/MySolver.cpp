@@ -129,6 +129,7 @@ bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
     Xis[2] = X_.z;
     Sophus::Vector3d X_Camera_coord = m_pose * Xis;
     Sophus::Vector3d x3 = K_ * X_Camera_coord;
+    cv::Point2d x_origin(x3(0) / x3(2), x3(1) / x3(2));
     cv::Point x_plane(x3(0) / x3(2), x3(1) / x3(2));
 //    LOG(INFO)<<"X_(Solver): "<<X_;
 //    LOG(INFO)<<"x_plane(Solver): "<<x_plane;
@@ -137,7 +138,18 @@ bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
         k_th_tmp++;
         return false;
     }
-    auto Theta_x = (double) (cur_frame->dt.at<float>(x_plane));
+    //bilinear interpolar
+    double origin_x = x_origin.x;
+    double origin_y = x_origin.y;
+    int left = floor(origin_x);
+    int right = ceil(origin_x);
+    int top = floor(origin_y);//top is smaller in image space
+    int bottom = ceil(origin_y);
+    auto top_dt = cur_frame->dt.at<float>(top,left)
+                  + (cur_frame->dt.at<float>(top,right) - cur_frame->dt.at<float>(top,left)) *  (origin_x - left);
+    auto btm_dt = cur_frame->dt.at<float>(bottom,left)
+                  + (cur_frame->dt.at<float>(bottom,right) - cur_frame->dt.at<float>(bottom,left)) *  (origin_x - left);
+    auto Theta_x = top_dt + (btm_dt - top_dt) * (origin_y - top);
 
     double He = M_1_PI*(-atan(option.He_b*Theta_x)+M_PI_2);
 

@@ -1,4 +1,0 @@
-Log file created at: 2018/01/11 19:33:35
-Running on machine: flammingdeMacBook-Air.local
-Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
-W0111 19:33:35.194869 2752758592 dataPaser.cpp:29]  getPose 0 0 0 0 0 0

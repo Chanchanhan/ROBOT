@@ -108,7 +108,7 @@ void Model::GetContourPointsAndIts3DPoints(const Sophus::SE3d &pose, std::vector
     }
     verticesContour_Xs = resVerticesContour_Xs;
     verticesContour_xs = resVerticesContour_xs;
-    delete randoms;
+    delete[] randoms;
 //    LOG(INFO)<<"verticesContour_Xs : "<<verticesContour_Xs.size();
 }
 
