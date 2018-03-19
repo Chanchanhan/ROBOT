@@ -23,6 +23,8 @@ public:
     cv::Mat segmentation;
     cv::Mat bound_map;
     cv::Mat dt;
+	cv::Mat dt_dx;
+	cv::Mat dt_dy;
     cv::Mat dtLocation;
 	std::vector<cv::Point2d> VerticesNear2ContourX2D;
     std::vector<cv::Point3d> VerticesNear2ContourX3D;

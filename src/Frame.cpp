@@ -38,11 +38,12 @@ void Frame::UpdateDTMap() {
     cv::Mat dt1(this->bound_map.size(),CV_32FC1),dt2(this->bound_map.size(),CV_32FC1);
     this->dt= cv::Mat(this->bound_map.size(),CV_32FC1);
     cv::distanceTransform(this->bound_map,dt1,CV_DIST_L2,3);//inside
-    cv::distanceTransform(255-this->bound_map,dt2,CV_DIST_L2,3);//outside
+    cv::distanceTransform(~this->bound_map,dt2,CV_DIST_L2,3);//outside
 
 
     this->dt= dt2-dt1;
-
+    cv::Sobel(this->dt,this->dt_dx,CV_32F,1,0);
+    cv::Sobel(this->dt,this->dt_dy,CV_32F,0,1);
 
 }
 
@@ -54,11 +55,13 @@ void Frame::UpdateDTMap(const std::vector<cv::Point> &contourX2D) {
     cv::Mat dt1(this->bound_map.size(),CV_32FC1),dt2(this->bound_map.size(),CV_32FC1);
     this->dt= cv::Mat(this->bound_map.size(),CV_32FC1);
     cv::distanceTransform(this->bound_map,dt1,CV_DIST_L2,3);//inside
-    cv::distanceTransform(255-this->bound_map,dt2,CV_DIST_L2,3);//outside
+    cout<<"hit"<<endl;
+    cv::distanceTransform(~this->bound_map,dt2,CV_DIST_L2,3);//outside
 
 
     this->dt= dt2-dt1;
-
+    cv::Sobel(this->dt,this->dt_dx,CV_32F,1,0);
+    cv::Sobel(this->dt,this->dt_dy,CV_32F,0,1);
 
 }
 cv::Point Frame::nearstContourP(const cv::Point &point) {

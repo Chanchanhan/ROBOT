@@ -87,10 +87,13 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
             LOG(INFO)<<"energy change little:  inital = "<<e_inital<<" ,final = "<<e_final;
 //            LOG(INFO)<<"update :"<<update;
             option.lamda/=option.lamdaSmaller;
-            continue;
+            break;
         }
         if(e_inital<e_final||e_final<option.energyTooSmallSize*e_inital){
              cur_frame->m_pose = initialPose;
+            model->GetContour(cur_frame->m_pose,newContour,iLevel);
+            cur_frame->UpdateDTMap(newContour);
+
             option.lamda*=option.lamdaSmaller;
             if(e_inital<e_final)
                 LOG(INFO)<<"energy become bigger:  inital = "<<e_inital<<" ,final = "<<e_final;
@@ -116,6 +119,8 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
             cv::waitKey(0);
         }
     }
+    LOG(INFO) <<cur_frame->m_pose.log();
+    LOG(INFO) <<cur_frame->gt_Pose.log();
 }
 void MySolver::ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt, const bool  _debug) {
     energySum=0;
@@ -127,8 +132,6 @@ void MySolver::ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Poin
         if(!ComputeEnergy(cur_frame,*Xi,energySum,_debug)){
             wrongPointCnt++;
         }
-
-
     }
 }
 void MySolver::ComputeEnergyAndDraw(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt, const bool  _debug,const std::string owner) {
@@ -159,7 +162,7 @@ bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
     cv::Point x_plane(x3(0) / x3(2), x3(1) / x3(2));
 //    LOG(INFO)<<"X_(Solver): "<<X_;
 //    LOG(INFO)<<"x_plane(Solver): "<<x_plane;
-    if(x_plane.x<0||x_plane.y<0||x_plane.x>=cur_frame->fw_posterior.rows||x_plane.y>=cur_frame->fw_posterior.cols){
+    if(x_plane.x<0||x_plane.y<0||x_plane.x>=cur_frame->fw_posterior.cols||x_plane.y>=cur_frame->fw_posterior.rows){
         energy+=100;
         k_th_tmp++;
         return false;
@@ -214,6 +217,27 @@ bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
 
     return  true;
 }
+
+inline float
+interpolateMat_32f(const cv::Mat& mat, float u, float v)
+{
+    assert(mat.type()==CV_32F);
+    float x = floor(u);
+    float y = floor(v);
+    float subpix_x = u-x;
+    float subpix_y = v-y;
+    float wx0 = 1.0-subpix_x;
+    float wx1 =  subpix_x;
+    float wy0 = 1.0-subpix_y;
+    float wy1 =  subpix_y;
+
+    float val00 = mat.at<float>(y,x);
+    float val10 = mat.at<float>(y,x+1);
+    float val01 = mat.at<float>(y+1,x);
+    float val11 = mat.at<float>(y+1,x+1);
+    return (wx0*wy0)*val00 + (wx1*wy0)*val10 + (wx0*wy1)*val01 + (wx1*wy1)*val11;
+}
+
 bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
                         double &energy,
                         Sophus::Vector6d &jac,bool &judge) const {
@@ -295,11 +319,9 @@ bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
     j_X_Lie(1, 3) = gConfig.FY * (1 + _y_in_Camera * _y_in_Camera / (_z_in_Camera * _z_in_Camera));
     j_X_Lie(1, 4) = -gConfig.FY * _x_in_Camera * _y_in_Camera / (_z_in_Camera * _z_in_Camera);
     j_X_Lie(1, 5) = -gConfig.FY * _x_in_Camera / _z_in_Camera;
-
-    j_Phi_x(0, 0) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x + 1, x_plane.y)) -
-                            cur_frame->dt.at<float>(cv::Point(x_plane.x - 1, x_plane.y)));
-    j_Phi_x(0, 1) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y + 1)) -
-                            cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y - 1)));
+    ;
+    j_Phi_x(0, 0) = interpolateMat_32f(cur_frame->dt_dx,origin_x,origin_y) * 0.5;
+    j_Phi_x(0, 1) =  interpolateMat_32f(cur_frame->dt_dy,origin_x,origin_y) * 0.5;
     Eigen::MatrixXd jacTmp = leftE * j_Phi_x * j_X_Lie;
 
     for(int i=0;i<6;i++)
