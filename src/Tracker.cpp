@@ -36,18 +36,12 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
     for(int iLevel= Config::ConfigInstance().IMG_PYR_NUMBER-1;iLevel>=0;iLevel--){
 
 #ifdef   PROJECT_WITH_GT
-        model_.GetContourPointsAndIts3DPoints(
-                cur_frame->gt_Pose, cur_frame_->VerticesNear2ContourX3D,
-                cur_frame_->VerticesNear2ContourX2D,
-                cur_frame_->gt_contourX2D, iLevel);
+        model_.GetContour(cur_frame->gt_Pose, cur_frame_->gt_contourX2D,iLevel);
+
+
 #endif
-
-        model_.GetContourPointsAndIts3DPoints(
-                cur_pose_, cur_frame_->VerticesNear2ContourX3D,
-                cur_frame_->VerticesNear2ContourX2D,
-                cur_frame_->contourX2D, iLevel);
-
-        if(cur_frame_->contourX2D.size()==0||cur_frame_->VerticesNear2ContourX3D.size()==0)
+        model_.GetContour(cur_frame_->m_pose,cur_frame_->contourX2D, iLevel);
+        if(cur_frame_->contourX2D.size()==0)
             continue;
 
 #ifdef   PROJECT_WITH_GT
@@ -75,14 +69,16 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         cur_frame_->fw_posterior = last_frame_->fw_posterior*0.9+cur_frame_->fw_posterior*0.1;
         cur_frame_->bg_posterior = last_frame_->bg_posterior*0.8+cur_frame_->bg_posterior*0.2;
 
-        Mat post_map = cur_frame_->fw_posterior > cur_frame_->bg_posterior;
+        // Mat post_map = cur_frame_->fw_posterior > cur_frame_->bg_posterior;
 
 #ifdef   PROJECT_WITH_GT
         cur_frame_->Segment(cur_frame_->imgPyramid[iLevel],cur_frame_->contourX2D, cur_frame_->segmentation,cur_frame_->bound_map);
         last_frame_->Segment(last_frame_->imgPyramid[iLevel],last_frame_->contourX2D, last_frame_->segmentation,last_frame_->bound_map);
-
 #endif
         cur_frame_->UpdateDTMap();
+        model_.ChoosePointsNearContour(cur_frame,
+                                       cur_frame->VerticesNear2ContourX3D,cur_frame->VerticesNear2ContourX2D,
+                                       cur_frame->contourX2D,iLevel);
 
         Mat input = cur_frame_->img.clone();
         model_.DisplayCV(cur_frame_->m_pose, {0, 255, 0}, input);
@@ -92,7 +88,7 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         mySolver.model = &model_;
         mySolver.Solve(cur_frame_,iLevel);
         //draw points
-     //   model_.DrawPoints(cur_frame_->m_pose,cur_frame_->VerticesNear2ContourX3D,*cur_frame_,iLevel);
+        //   model_.DrawPoints(cur_frame_->m_pose,cur_frame_->VerticesNear2ContourX3D,*cur_frame_,iLevel);
 
 
         //draw out
@@ -100,7 +96,7 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         model_.DisplayCV(cur_frame_->m_pose, {0, 255, 0}, out);
         model_.DisplayGL(cur_frame_->m_pose,iLevel);
         imshow("outPut",out);
-        imshow("result",post_map);
+        //   imshow("result",post_map);
         waitKey(0);
     }
 

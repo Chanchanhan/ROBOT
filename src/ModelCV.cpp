@@ -23,7 +23,43 @@ void Model::GetContour(const Sophus::SE3d &pose,std::vector<cv::Point> &resConto
     resContour = contours[0];
 
 }
+void Model::ChoosePointsNearContour(FramePtr frame, std::vector<cv::Point3d> &verticesContour_Xs,
+                                    std::vector<cv::Point2d> &verticesContour_xs, const std::vector<cv::Point> &contour,
+                                    const int iLevel) {
+    verticesContour_Xs.resize(0);
+    verticesContour_xs.resize(0);
+    int totalN=contour.size();
+    int *randoms = new int[totalN];
+    for (int i = 0; i < totalN; i++) {
+        randoms[i] = i;
+    }
+    for (int i = 0; i < totalN; i++) {
+        std::swap(randoms[i], randoms[i + rand() % (totalN - i)]);
+    }
+    if (totalN > Config::ConfigInstance().TK_VER_NUMBER) {
+        totalN=Config::ConfigInstance().TK_VER_NUMBER;
+    }
+    int near[4][2] = {{2,  0},
+                      {0,  -2},
+                      {0,  2},
+                      {-2, 0}};
 
+    for(int i=0;i<totalN;i++){
+        for(int j=0;j<4;j++){
+            cv::Point xi=cv::Point(contour[randoms[i]].x+near[j][0],contour[randoms[i]].y+near[j][1]);
+            if(frame->dt.at<float>(xi)>=0){
+                xi= frame->GetNearstContourP(xi,frame->dtLocationOutside,iLevel);
+            }
+            cv::Point3f Xi=BackProjectPoint(xi);
+           // Xi.z=1;
+
+            if(PointInFrame(xi, iLevel)){
+                verticesContour_Xs.push_back(Xi);
+                verticesContour_xs.push_back(xi);
+            }
+        }
+    }
+}
 void Model::GetContourPointsAndIts3DPoints(const Sophus::SE3d &pose, std::vector<cv::Point3d> &verticesContour_Xs,
                                            std::vector<cv::Point2d> &verticesContour_xs,
                                            std::vector<cv::Point> &resContour, const int iLevel) {
@@ -210,6 +246,7 @@ void Model::DisplayGL(const Sophus::SE3d &pose ,const int iLevel) {
     render.matrixFromCV2GL(extrinsic,shapePoseInfo.mv_matrix);
     render.m_shapePoseInfo.push_back(shapePoseInfo);
     render.rendering();
+    render.getDepthImg();
 }
 
 bool Model::PointInFrame(const cv::Point &p, const int iLevel){
