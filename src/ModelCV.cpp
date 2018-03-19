@@ -149,7 +149,7 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
     cv::Mat extrinsic(4, 4, CV_32FC1);
     extrinsic = Se2cvf(pose);
     cv::Mat pt_status = frame.fw_posterior > frame.bg_posterior;
-    cv::Mat out = frame.img.clone();
+    cv::Mat out = frame.imgPyramid[iLevel].clone();
    // DisplayCV(pose, cv::Scalar(0,0,0),out,iLevel);
 
     int wrong=0;

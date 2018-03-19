@@ -47,6 +47,8 @@ void Frame::UpdateDTMap() {
 }
 
 void Frame::UpdateDTMap(const std::vector<cv::Point> &contourX2D) {
+    if(contourX2D.empty())
+        return;
     vector<vector<Point>> contours;
     contours.push_back(contourX2D);
     cv::drawContours(bound_map, contours,-1, Scalar(255), CV_FILLED);
