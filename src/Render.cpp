@@ -99,33 +99,6 @@ void Render::display(void)
 
 }
 
-void Render::display_wgf(void)
-{
-    glEnable(GL_DEPTH_TEST);
-    glDepthRange(0,1);
-    glClearColor(0.0,0.0,0.0,1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_COLOR_MATERIAL);
-    glEnable(GL_LIGHT0);
-    /*glPolygonMode(GL_FRONT,GL_LINE);
-    glPolygonMode(GL_BACK,GL_LINE);*/
-
-    glMatrixMode(GL_MODELVIEW);
-
-    for(int i=0; i<(int)m_shapePoseInfo.size(); i++)
-    {
-        glLoadIdentity();
-        glLoadMatrixf(m_shapePoseInfo[i].mv_matrix);
-        if(m_shapePoseInfo[i].m_shape)
-            //glmDraw(m_shapePoseInfo[i].m_shape,GLM_NONE);
-            glmDraw_wgf(m_shapePoseInfo[i].m_shape,GLM_SMOOTH|GLM_MATERIAL);
-    }
-    glFlush();
-}
-
 
 void Render::rendering()
 {
@@ -137,17 +110,9 @@ void Render::rendering()
 
 }
 
-void Render::rendering_for_vg()
-{
-    glutDisplayFunc(display_wgf);
-    glutReshapeFunc(reshape);
-    glutPostRedisplay();
-    glutMainLoopEvent();
-    //glutSwapBuffers();
-}
 
 
-void Render::matrixFromCV2GL(cv::Mat& cv_matrix, GLfloat* gl_matrix)
+void Render::matrixFromCV2GL(const cv::Mat& cv_matrix, GLfloat* gl_matrix)
 {
     const float pi = 3.1415926f;
     cv::Mat rx(4,4,CV_32FC1);

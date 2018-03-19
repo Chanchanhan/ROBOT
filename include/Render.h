@@ -30,7 +30,7 @@ namespace ORD
         /*static void mouse(int button, int state, int x, int y);
         static void mouseMovement(int x, int y);*/
         static void buildProjectionMatrix(const cv::Mat& calibration, GLfloat* projectionMatrix);
-        static void matrixFromCV2GL(cv::Mat& cv_matrix, GLfloat* gl_matrix);
+        static void matrixFromCV2GL(const cv::Mat& cv_matrix, GLfloat* gl_matrix);
         static void rendering();
         static void rendering_for_vg();
         static cv::Point3f get3DPos(int x, int y);

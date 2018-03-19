@@ -9,14 +9,14 @@ using namespace std;
 
 DataPaser::DataPaser(const OcvYamlConfig& config)
 {
-  Config::loadConfig(config);
+    Config::LoadConfig(config);
 
   FLAGS_log_dir=config.text("Output.Directory.LOG_DIR");     
   FLAGS_stderrthreshold = std::lround(config.value_f("LOG_Threshold"));  // INFO: 0, WARNING: 1, ERROR: 2, FATAL: 3
 
-  gtData= std::ifstream(Config::configInstance().gtFile);      
+  gtData= std::ifstream(Config::ConfigInstance().gtFile);
       /*** load first frame to init***/
-    starframeId=Config::configInstance().START_INDEX;
+    starframeId= Config::ConfigInstance().START_INDEX;
 
     int k=0;
     while(k<starframeId){
@@ -25,11 +25,11 @@ DataPaser::DataPaser(const OcvYamlConfig& config)
       k++;
     }
 
-    videoCapture.open(Config::configInstance().videoPath);
+    videoCapture.open(Config::ConfigInstance().videoPath);
 }
 bool DataPaser::doTraking()
 {
-    if(Config::configInstance().USE_VIDEO){
+    if(Config::ConfigInstance().USE_VIDEO){
         doTrakingWithVideo();
     }
     else{
@@ -45,7 +45,7 @@ void DataPaser::doTrakingWithVideo()
 {
   int frameId=starframeId; 
   cv::VideoCapture videoCapture;
-  Config &gConfig = Config::configInstance();
+  Config &gConfig = Config::ConfigInstance();
   videoCapture.open(gConfig.videoPath);
   if (!videoCapture.isOpened())
   {
@@ -72,7 +72,7 @@ void DataPaser::doTrakingWithVideo()
 	    cv::imshow("frameDrawing",frameDrawing);
 	    cv::waitKey(1);
       }
-      if(Config::configInstance().USE_GT){
+      if(Config::ConfigInstance().USE_GT){
 	    getNextGTData(prePose);
       }
     }

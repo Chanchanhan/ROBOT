@@ -8,7 +8,7 @@
 #include <opencv2/core.hpp>
 #include "./../ThirdParty/glm/glm.h"
 #include "Frame.h"
-
+#include "Render.h"
 class Model {
 public:
     Model();
@@ -20,14 +20,16 @@ public:
     //cv part
     void SampleVertex(FramePtr frame,std::vector<cv::Point3d> &verticesContour_Xs,std::vector<cv::Point2d> &verticesContour_xs);
 
+    void DisplayGL(const Sophus::SE3d &pose,const int iLevel=0);
 
     bool PointInFrame(const cv::Point &p, const int iLevel = 0);
-
+    cv::Point3f BackProjectPoint(const cv::Point &p);
     void GetContour(const Sophus::SE3d &pose,std::vector<cv::Point> &resContour, const int iLevel);
     void GetContourPointsAndIts3DPoints(const Sophus::SE3d &pose, std::vector<cv::Point3d> &verticesContour_Xs,
                                         std::vector<cv::Point2d> &verticesContour_xs,
                                         std::vector<cv::Point> &resContour,
                                         const int iLevel = 0);
+
     void DisplayCV(const Sophus::SE3d &pose, const cv::Scalar &color, cv::Mat &frame, const int iLevel = 0);
     void DrawPoints(const Sophus::SE3d &pose,const  std::vector<cv::Point3d> &Xs,cv::Mat &frame,const int iLevel=0);
     void DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> &Xs, Frame &frame,const std::string owner="verify",
@@ -43,8 +45,7 @@ private:
 
     std::vector<cv::Point> GetContourAt(Sophus::SE3d &pose);
     cv::Point X_to_x(const cv::Point3f &X,const cv::Mat &extrisic,const int &iLevel=0);
-    int VerticesCount() {return model_->numvertices;}
-private:
+    inline int VerticesCount() {return model_->numvertices;}
     inline void Cross(float* u, float* v, float* n) {
       n[0] = u[1] * v[2] - u[2] * v[1];
       n[1] = u[2] * v[0] - u[0] * v[2];
@@ -55,6 +56,9 @@ private:
 	float l = (float)sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 	v[0] /= l, v[1] /= l, v[2] /= l;
     }
+
+private:
+    ORD::Render render;
     GLMmodel* model_;
     cv::Mat vertices_hom_;
 };

@@ -23,7 +23,7 @@ void Frame::Segment(const cv::Mat &inPutImg,const std::vector<cv::Point> &contou
 
 void Frame::GetPyraid(const int &nPyraid) {
     imgPyramid.resize(nPyraid);
-    Config &config= Config::configInstance();
+    Config &config= Config::ConfigInstance();
     imgPyramid[0]=img.clone();
     for(int i =1;i<nPyraid;i++){
         cv::Mat dst;
@@ -34,7 +34,7 @@ void Frame::GetPyraid(const int &nPyraid) {
 
 void Frame::UpdateDTMap() {
 
-    vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);
+    vector<float> weights(2, Config::ConfigInstance().IMG_DT_WEIGHT);
     cv::Mat dt1(this->bound_map.size(),CV_32FC1),dt2(this->bound_map.size(),CV_32FC1);
     this->dt= cv::Mat(this->bound_map.size(),CV_32FC1);
 //    cv::distanceTransform(this->bound_map,dt1,CV_DIST_L2,3);//inside
@@ -50,7 +50,7 @@ void Frame::UpdateDTMap() {
 void Frame::UpdateDTMap(const std::vector<cv::Point> &contourX2D) {
     if(contourX2D.empty())
         return;
-    vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);
+    vector<float> weights(2, Config::ConfigInstance().IMG_DT_WEIGHT);
 
     vector<vector<Point>> contours;
     contours.push_back(contourX2D);
@@ -74,7 +74,7 @@ cv::Point Frame::GetNearstContourP(const cv::Point &point, const cv::Mat &dtLoca
     int y= point.x;
 
     int *_locations=(int *)dtLocation.data;
-    Config &g_Config = Config::configInstance();
+    Config &g_Config = Config::ConfigInstance();
     int weight = g_Config.VIDEO_WIDTH /std:: pow(2,iLevel),
             height = g_Config.VIDEO_HEIGHT /std:: pow(2,iLevel);
     while(_locations[y + weight * x]!=x||_locations[height *weight+y + weight * x]!=y){

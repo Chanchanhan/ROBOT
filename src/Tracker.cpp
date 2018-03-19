@@ -13,40 +13,33 @@ using namespace std;
 using namespace ceres;
 
 void Tracker::init(const OcvYamlConfig& ocvYamlConfig) {
-    model_.LoadObj(Config::configInstance().objFile);
+    model_.LoadObj(Config::ConfigInstance().objFile);
 }
 
 void Tracker::ProcessFirstFrame(FramePtr cur_frame)
 {
     cur_frame_ = cur_frame;
     cur_frame_->m_pose = cur_frame->gt_Pose;
-    cur_frame_->GetPyraid(Config::configInstance().IMG_PYR_NUMBER);
+    cur_frame_->GetPyraid(Config::ConfigInstance().IMG_PYR_NUMBER);
 }
 
 void Tracker::ProcessFrame(FramePtr cur_frame) {
     last_frame_ = cur_frame_;
     cur_frame_ = cur_frame;
-    cur_frame_->GetPyraid(Config::configInstance().IMG_PYR_NUMBER);
+    cur_frame_->GetPyraid(Config::ConfigInstance().IMG_PYR_NUMBER);
 
 
     if(last_frame_.use_count()!=0) {
         cur_pose_ = last_frame_->m_pose;
         cur_frame_->m_pose = last_frame_->m_pose;
     }
-    for(int iLevel=Config::configInstance().IMG_PYR_NUMBER-1;iLevel>=0;iLevel--){
-//        ORD::Render render;
-//        char* renderName="render";
-//        render.init(model_.intrinsics[iLevel],
-//                    Config::configInstance().VIDEO_WIDTH*std::pow(0.5,Config::configInstance().IMG_PYR_NUMBER-iLevel),
-//                    Config::configInstance().VIDEO_HEIGHT*std::pow(0.5,Config::configInstance().IMG_PYR_NUMBER-iLevel),
-//                    0,&renderName);
+    for(int iLevel= Config::ConfigInstance().IMG_PYR_NUMBER-1;iLevel>=0;iLevel--){
 
 #ifdef   PROJECT_WITH_GT
         model_.GetContourPointsAndIts3DPoints(
                 cur_frame->gt_Pose, cur_frame_->VerticesNear2ContourX3D,
                 cur_frame_->VerticesNear2ContourX2D,
                 cur_frame_->gt_contourX2D, iLevel);
-
 #endif
 
         model_.GetContourPointsAndIts3DPoints(
@@ -105,6 +98,7 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         //draw out
         Mat out = cur_frame_->img.clone();
         model_.DisplayCV(cur_frame_->m_pose, {0, 255, 0}, out);
+        model_.DisplayGL(cur_frame_->m_pose,iLevel);
         imshow("outPut",out);
         imshow("result",post_map);
         waitKey(0);

@@ -5,6 +5,7 @@
 #include "Pose.h"
 #include "Model.h"
 #include "GlobalConfig.h"
+#include "Render.h"
 Model::Model() {
     model_ = NULL;
 
@@ -20,7 +21,7 @@ Model::~Model() {
         glmDelete(model_);
 }
 void Model::SetIntrinsic() {
-    const Config &gConfig = Config::configInstance();
+    const Config &gConfig = Config::ConfigInstance();
     intrinsic=cv::Mat(3,4,CV_32FC1);
     intrinsic.at<float>(0,0)=gConfig.FX;    intrinsic.at<float>(0,1)=0;             intrinsic.at<float>(0,2)=gConfig.CX; intrinsic.at<float>(0,3)=0;
     intrinsic.at<float>(1,0)=0;             intrinsic.at<float>(1,1)=gConfig.FY;    intrinsic.at<float>(1,2)=gConfig.CY; intrinsic.at<float>(1,3)=0;
@@ -34,6 +35,12 @@ void Model::SetIntrinsic() {
         intrinsics[i].at<float>(2,0)=0;             intrinsics[i].at<float>(2,1)=0;             intrinsics[i].at<float>(2,2)=1; intrinsics[i].at<float>(2,3)=0;
 
     }
+    char* renderName="render";
+    render.init(intrinsic,
+                Config::ConfigInstance().VIDEO_WIDTH,
+                Config::ConfigInstance().VIDEO_HEIGHT,
+                0,&renderName);
+
 }
 
 void Model::LoadObj(const std::string &filename) {

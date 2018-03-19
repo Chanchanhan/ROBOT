@@ -49,7 +49,7 @@ class CeresSolver {
 
 //            auto sigmoid = [](double x){1.0/(1.0+std::exp(-Theta_x))};
 //            auto He = (1.0) / ((1) + ceres::exp(-Theta_x));
-            const int b=Config::configInstance().SV_HE_b;
+            const int b= Config::ConfigInstance().SV_HE_b;
             double He = M_1_PI*(-atan(b*Theta_x)+M_PI_2);
             double delta = -M_1_PI*b/(1+b*b*Theta_x*Theta_x);
 //        if(Theta_x>8)
@@ -65,7 +65,7 @@ class CeresSolver {
             Eigen::MatrixXd j_X_Lie(2, 6);
             Eigen::MatrixXd j_Phi_x(1, 2);
 
-            Config &gConfig = Config::configInstance();
+            Config &gConfig = Config::ConfigInstance();
             double _x_in_Camera = X_Camera_coord[0];
             double _y_in_Camera = X_Camera_coord[1];
             double _z_in_Camera = X_Camera_coord[2];

@@ -42,8 +42,8 @@ public:
 
 public:
 
-    static void loadConfig(const OcvYamlConfig &ocvYamlConfig){
-        Config &configInstance = Config::configInstance() ;
+    static void LoadConfig(const OcvYamlConfig &ocvYamlConfig){
+        Config &configInstance = Config::ConfigInstance() ;
 
         //parameters for init
         {
@@ -88,27 +88,27 @@ public:
         }
         //Load Files
         {
-            loadFiles();
+            LoadFiles();
         }
     }
 
-    static Config& configInstance() {
+    static Config& ConfigInstance() {
         static Config G_CONFIG;
         return G_CONFIG;
     }
 private:
-    static void loadFiles(){
+    static void LoadFiles(){
         std::string str;
-        std::ifstream _DISTORTIONS=std::ifstream(configInstance().DISTORTIONS);
+        std::ifstream _DISTORTIONS=std::ifstream(ConfigInstance().DISTORTIONS);
         if(_DISTORTIONS.is_open()){
             std::getline(_DISTORTIONS,str) ;
             std::istringstream gt_line(str);
             int i=0;
             for (float pos; gt_line >> pos; ++i) {
-                configInstance().distortions[i] = pos;
+                ConfigInstance().distortions[i] = pos;
             }
         }else{
-            memset(configInstance().distortions,0,5*sizeof(float));
+            memset(ConfigInstance().distortions,0,5*sizeof(float));
         }
     }
 };

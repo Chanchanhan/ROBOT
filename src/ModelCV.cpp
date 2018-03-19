@@ -12,8 +12,8 @@ using namespace cv;
 void Model::GetContour(const Sophus::SE3d &pose,std::vector<cv::Point> &resContour, const int iLevel) {
     resContour.resize(0);
     std::vector<std::vector<cv::Point>> contours;
-    int weight = Config::configInstance().VIDEO_WIDTH /std:: pow(2,iLevel),
-            height = Config::configInstance().VIDEO_HEIGHT /std:: pow(2,iLevel);
+    int weight = Config::ConfigInstance().VIDEO_WIDTH /std:: pow(2,iLevel),
+            height = Config::ConfigInstance().VIDEO_HEIGHT /std:: pow(2,iLevel);
     cv::Mat line_img = cv::Mat::zeros(height,weight, CV_8UC1);
     DisplayCV(pose, cv::Scalar(255, 255, 255), line_img, iLevel);
     cv::findContours(line_img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
@@ -34,7 +34,7 @@ void Model::GetContourPointsAndIts3DPoints(const Sophus::SE3d &pose, std::vector
     GetVisualableVertices(pose, visible_Xs);
 
     Project3D_2D(pose, visible_Xs, visible_xs, iLevel);
-    Config &g_Config = Config::configInstance();
+    Config &g_Config = Config::ConfigInstance();
     int weight = g_Config.VIDEO_WIDTH /std:: pow(2,iLevel),
         height = g_Config.VIDEO_HEIGHT /std:: pow(2,iLevel);
 
@@ -133,7 +133,7 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
     cv::Mat out = frame.clone();
 
     for(int i=0;i<Xs.size();i++){
-        if(Config::configInstance().pointState[i]){
+        if(Config::ConfigInstance().pointState[i]){
             DrawOnePoint(extrinsic,Xs[i],frame,cv::Scalar(0,0,255), iLevel);//inside
 
         }else {
@@ -155,7 +155,7 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
     int wrong=0;
     for(int i=0;i<Xs.size();i++){
         auto p2d= X_to_x(Xs[i],extrinsic,iLevel);
-        switch (Config::configInstance().pointState[i]){
+        switch (Config::ConfigInstance().pointState[i]){
             case 0:
                 wrong++;
                 circle(out,p2d,3,cv::Scalar(255,0,0));//b->f ,蓝色
@@ -198,9 +198,22 @@ void Model::DisplayCV(const Sophus::SE3d &pose, const cv::Scalar &color, cv::Mat
         }
     }
 }
+cv::Point3f Model::BackProjectPoint(const cv::Point &p) {
+    return render.get3DPos(p.x,p.y);
+}
+void Model::DisplayGL(const Sophus::SE3d &pose ,const int iLevel) {
+    cv::Mat extrinsic(4, 4, CV_32FC1);
+    extrinsic = Se2cvf(pose);
+    render.m_shapePoseInfo.clear();
+    ORD::ShapePoseInfo shapePoseInfo;
+    shapePoseInfo.m_shape = model_;
+    render.matrixFromCV2GL(extrinsic,shapePoseInfo.mv_matrix);
+    render.m_shapePoseInfo.push_back(shapePoseInfo);
+    render.rendering();
+}
 
 bool Model::PointInFrame(const cv::Point &p, const int iLevel){
-    Config &gConfig = Config::configInstance();
+    Config &gConfig = Config::ConfigInstance();
     return(p.x>=0&&p.y>=0&&p.x*pow(2,iLevel)<gConfig.VIDEO_WIDTH&&p.y*pow(2,iLevel)<gConfig.VIDEO_HEIGHT);
 }
 void Model::GetVisualableVertices(const Sophus::SE3d &pose, cv::Mat &vis_vertices) {
@@ -301,7 +314,7 @@ std::vector<cv::Point> Model::GetContourAt(Sophus::SE3d &pose) {
     cv::Mat visible_Xs,visible_xs;
     GetVisualableVertices(pose, visible_Xs);
     Project3D_2D(pose, visible_Xs, visible_xs);
-    Config &g_Config = Config::configInstance();
+    Config &g_Config = Config::ConfigInstance();
 
     std::vector<std::vector<cv::Point> > contours;
 

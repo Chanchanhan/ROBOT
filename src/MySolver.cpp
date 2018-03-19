@@ -4,13 +4,14 @@
 
 #include "MySolver.h"
 #include "Model.h"
+#include <thread>
 MySolver::MySolver(cv::Mat &intrinsic){
-    option.max_iterations=Config::configInstance().SV_MAX_ITERATIONS;
-    option.energyOK=Config::configInstance().SV_E_OK;
-    option.energyTooSmallSize=Config::configInstance().SV_E_TOO_SMALL_SIZE;
-    option.He_b=Config::configInstance().SV_HE_b;
-    option.max_wrong_point=Config::configInstance().SV_MAX_WRONG_POINT;
-    option.lamda=Config::configInstance().SV_LAMDA_b;
+    option.max_iterations= Config::ConfigInstance().SV_MAX_ITERATIONS;
+    option.energyOK= Config::ConfigInstance().SV_E_OK;
+    option.energyTooSmallSize= Config::ConfigInstance().SV_E_TOO_SMALL_SIZE;
+    option.He_b= Config::ConfigInstance().SV_HE_b;
+    option.max_wrong_point= Config::ConfigInstance().SV_MAX_WRONG_POINT;
+    option.lamda= Config::ConfigInstance().SV_LAMDA_b;
     option.energyLittle=0.01;
     option.lamdaSmaller=0.1;
     for (int i = 0; i < 3; ++i) {
@@ -146,7 +147,7 @@ void MySolver::ComputeEnergyAndDraw(const FramePtr cur_frame,const std::vector<c
             wrongPointCnt++;
         }
     }
-    Config::configInstance().pointState=pointStateTmp;
+    Config::ConfigInstance().pointState=pointStateTmp;
     model->DrawPoints(cur_frame->m_pose,Xs,*cur_frame,owner,iLevel);
 }
 bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, double &energy, const bool  _debug) {
@@ -283,7 +284,7 @@ bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
     Eigen::MatrixXd j_X_Lie(2, 6);
     Eigen::MatrixXd j_Phi_x(1, 2);
 
-    Config &gConfig = Config::configInstance();
+    Config &gConfig = Config::ConfigInstance();
     double _x_in_Camera = X_Camera_coord[0];
     double _y_in_Camera = X_Camera_coord[1];
     double _z_in_Camera = X_Camera_coord[2];
