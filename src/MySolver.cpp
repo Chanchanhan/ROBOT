@@ -14,6 +14,7 @@ MySolver::MySolver(cv::Mat &intrinsic){
     option.lamda= Config::ConfigInstance().SV_LAMDA_b;
     option.energyLittle=0.01;
     option.lamdaSmaller=0.1;
+    option.energyOut=10;
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             K_(i,j) = intrinsic.at<float>(i,j);
@@ -72,7 +73,7 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
             double  e_gt;
             int gtWrongJudgeCnt;
             std::vector<cv::Point> newContour;
-            model->GetContour(cur_frame->m_pose,newContour,iLevel);
+            model->GetContour(cur_frame->gt_Pose,newContour,iLevel);
             cur_frame->UpdateDTMap(newContour);
             Sophus::SE3d tmpPose=cur_frame->m_pose;
             cur_frame->m_pose=cur_frame->gt_Pose;
@@ -119,7 +120,7 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
 
             LOG(WARNING)<<"energy become smaller:  inital = "<<e_inital<<" ,final = "<<e_final<<
                         " , initial finalWrongJudgeCnt = "<<initWrongJudgeCnt<<", final finalWrongJudgeCnt = "<<finalWrongJudgeCnt ;
-            //  cv::waitKey(0);
+             cv::waitKey(0);
         }
     }
 }
@@ -165,7 +166,7 @@ bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
 //    LOG(INFO)<<"X_(Solver): "<<X_;
 //    LOG(INFO)<<"x_plane(Solver): "<<x_plane;
     if(x_plane.x<0||x_plane.y<0||x_plane.x>=cur_frame->fw_posterior.rows||x_plane.y>=cur_frame->fw_posterior.cols){
-        energy+=2;
+        energy+=option.energyOut;
         k_th_tmp++;
         return false;
     }
@@ -192,7 +193,7 @@ bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
 //    }else
 //        pointStateTmp[k_th_tmp++]= true;
     if(std::isnan(x_energy)){
-        x_energy=1;
+        x_energy=option.energyOut;
         energy+=x_energy;
 
         return false;
@@ -302,10 +303,13 @@ bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
     j_X_Lie(1, 3) = gConfig.FY * (1 + _y_in_Camera * _y_in_Camera / (_z_in_Camera * _z_in_Camera));
     j_X_Lie(1, 4) = -gConfig.FY * _x_in_Camera * _y_in_Camera / (_z_in_Camera * _z_in_Camera);
     j_X_Lie(1, 5) = -gConfig.FY * _x_in_Camera / _z_in_Camera;
+
+
+
     cv::Point nearstPoint = cur_frame->GetNearstContourP(x_plane,
                     cur_frame->dt.at<float>(x_plane)>0? cur_frame->dtLocationOutside:cur_frame->dtLocationInside,iLevel);
-    j_Phi_x(0,0)=2*(x_plane.x - nearstPoint.x);
-    j_Phi_x(0,1)=2*(x_plane.y - nearstPoint.y);
+    j_Phi_x(0,0)=(x_plane.x - nearstPoint.x)/fabs(cur_frame->dt.at<float>(x_plane));
+    j_Phi_x(0,1)=(x_plane.y - nearstPoint.y)/fabs(cur_frame->dt.at<float>(x_plane));
 //    j_Phi_x(0, 0) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x + 1, x_plane.y)) -
 //                            cur_frame->dt.at<float>(cv::Point(x_plane.x - 1, x_plane.y)));
 //    j_Phi_x(0, 1) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y + 1)) -

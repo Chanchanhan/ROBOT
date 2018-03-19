@@ -86,7 +86,7 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
 
         Mat input = cur_frame_->img.clone();
         model_.DisplayCV(cur_frame_->m_pose, {0, 255, 0}, input);
-        imshow("input",input);
+     //   imshow("input",input);
         //to solve
         MySolver mySolver(model_.intrinsics[iLevel]);
         mySolver.model = &model_;
@@ -99,9 +99,9 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         Mat out = cur_frame_->img.clone();
         model_.DisplayCV(cur_frame_->m_pose, {0, 255, 0}, out);
         model_.DisplayGL(cur_frame_->m_pose,iLevel);
-        imshow("outPut",out);
-        imshow("result",post_map);
-        waitKey(0);
+      imshow("outPut",out);
+      //  imshow("result",post_map);
+    //    waitKey(0);
     }
 
 }

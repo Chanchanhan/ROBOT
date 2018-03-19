@@ -23,6 +23,7 @@ class MySolver {
         double energyOK;
         double energyLittle;
         double He_b;
+        double energyOut;
         int max_wrong_point;
         double energyTooSmallSize;
         double stepTooBigSize;
