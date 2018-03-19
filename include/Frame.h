@@ -23,7 +23,9 @@ public:
     cv::Mat segmentation;
     cv::Mat bound_map;
     cv::Mat dt;
-    cv::Mat dtLocation;
+    cv::Mat dtLocationInside;
+	cv::Mat dtLocationOutside;
+
 	std::vector<cv::Point2d> VerticesNear2ContourX2D;
     std::vector<cv::Point3d> VerticesNear2ContourX3D;
 	std::vector<cv::Point> contourX2D;
@@ -41,7 +43,7 @@ public:
 	void UpdateDTMap(const std::vector<cv::Point> &contourX2D);
     void DTMap(const cv::Mat &inPut,cv::Mat &dt,cv::Mat &dtLocation);
     void GetPyraid(const int &nPyraid);
-    cv::Point nearstContourP(const cv::Point &p);
+    cv::Point GetNearstContourP(const cv::Point &p, const cv::Mat &dtLocation,const int iLevel=0);
     void ComputePosterior(const cv::Mat &inputImg,const std::vector<Region>& rg);
 
 	void ComputePosterior(const cv::Mat &inPutImg,const std::vector<Region>& rg,cv::Mat &fw_posterior,cv::Mat &bg_posterior);

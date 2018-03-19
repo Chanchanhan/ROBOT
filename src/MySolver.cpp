@@ -23,14 +23,7 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
     for(int k=0;k<option.max_iterations;k++){
 //        LOG(INFO)<<cur_frame->m_pose.log();
 
-        {
-            //update dt map
-            std::vector<cv::Point> newContour;
-            model->GetContour(cur_frame->m_pose,newContour,iLevel);
-            if(newContour.empty())
-                return;
-            cur_frame->UpdateDTMap(newContour);
-        }
+
 
         Sophus::Vector6d jacobians=Sophus::Vector6d::Zero();
         Sophus::Vector6d bs=Sophus::Vector6d::Zero();
@@ -44,7 +37,7 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
             double energy=0;
             Sophus::Vector6d jac;
             bool judge;
-            if(Evaluate(cur_frame,Xi,energy,jac,judge)){
+            if(Evaluate(cur_frame,Xi,energy,jac,judge,iLevel)){
                 initWrongJudgeCnt+=(!judge)?1:0;
                 bs=jac*energy;
                 e_inital+=energy;
@@ -104,13 +97,19 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
             else
                 LOG(INFO)<<"finalWrongJudgeCnt too much :"<<finalWrongJudgeCnt<<" , initial WrongJudgeCnt = "
                          <<initWrongJudgeCnt<<" , inital = "<<e_inital<<" ,final = "<<e_final;
-
+            {
+                //update dt map back
+                std::vector<cv::Point> newContour;
+                model->GetContour(cur_frame->m_pose,newContour,iLevel);
+                cur_frame->UpdateDTMap(newContour);
+            }
             // break;
         }else if(fabs(e_final-e_inital)<option.energyLittle){
 
             LOG(INFO)<<"energy change little:  inital = "<<e_inital<<" ,final = "<<e_final;
 //            LOG(INFO)<<"update :"<<update;
             option.lamda/=option.lamdaSmaller;
+
             continue;
         }
 
@@ -221,7 +220,7 @@ bool MySolver::ComputeEnergy(const FramePtr cur_frame,const cv::Point3d &X_, dou
 }
 bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
                         double &energy,
-                        Sophus::Vector6d &jac,bool &judge) const {
+                        Sophus::Vector6d &jac,bool &judge,const int iLevel) const {
 
 
     auto m_pose =cur_frame->m_pose;
@@ -302,11 +301,14 @@ bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
     j_X_Lie(1, 3) = gConfig.FY * (1 + _y_in_Camera * _y_in_Camera / (_z_in_Camera * _z_in_Camera));
     j_X_Lie(1, 4) = -gConfig.FY * _x_in_Camera * _y_in_Camera / (_z_in_Camera * _z_in_Camera);
     j_X_Lie(1, 5) = -gConfig.FY * _x_in_Camera / _z_in_Camera;
-
-    j_Phi_x(0, 0) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x + 1, x_plane.y)) -
-                            cur_frame->dt.at<float>(cv::Point(x_plane.x - 1, x_plane.y)));
-    j_Phi_x(0, 1) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y + 1)) -
-                            cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y - 1)));
+    cv::Point nearstPoint = cur_frame->GetNearstContourP(x_plane,
+                    cur_frame->dt.at<float>(x_plane)>0? cur_frame->dtLocationOutside:cur_frame->dtLocationInside,iLevel);
+    j_Phi_x(0,0)=2*(x_plane.x - nearstPoint.x);
+    j_Phi_x(0,1)=2*(x_plane.y - nearstPoint.y);
+//    j_Phi_x(0, 0) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x + 1, x_plane.y)) -
+//                            cur_frame->dt.at<float>(cv::Point(x_plane.x - 1, x_plane.y)));
+//    j_Phi_x(0, 1) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y + 1)) -
+//                            cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y - 1)));
     Eigen::MatrixXd jacTmp = leftE * j_Phi_x * j_X_Lie;
 
     for(int i=0;i<6;i++)

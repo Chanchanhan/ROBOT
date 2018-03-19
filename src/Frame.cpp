@@ -16,7 +16,7 @@ void Frame::Segment(const cv::Mat &inPutImg,const std::vector<cv::Point> &contou
     vector<vector<Point>> contours;
     contours.push_back(contourX2D);
     segmentation = Mat::zeros(inPutImg.rows,inPutImg.cols,CV_8U);
-    bound_map = Mat::zeros(inPutImg.rows,inPutImg.cols,CV_8UC1);
+    bound_map = Mat::zeros(inPutImg.rows,inPutImg.cols,CV_32FC1);
     cv::drawContours(segmentation, contours,-1, Scalar(255), CV_FILLED);
     cv::drawContours(bound_map, contours,-1, Scalar(255),CV_FILLED);
 }
@@ -37,10 +37,11 @@ void Frame::UpdateDTMap() {
     vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);
     cv::Mat dt1(this->bound_map.size(),CV_32FC1),dt2(this->bound_map.size(),CV_32FC1);
     this->dt= cv::Mat(this->bound_map.size(),CV_32FC1);
-    cv::distanceTransform(this->bound_map,dt1,CV_DIST_L2,3);//inside
-    cv::distanceTransform(255-this->bound_map,dt2,CV_DIST_L2,3);//outside
+//    cv::distanceTransform(this->bound_map,dt1,CV_DIST_L2,3);//inside
+//    cv::distanceTransform(255-this->bound_map,dt2,CV_DIST_L2,3);//outside
 
-
+    distanceTransform(bound_map,dt1,dtLocationInside,weights);
+    distanceTransform(255-bound_map,dt2,dtLocationOutside,weights);
     this->dt= dt2-dt1;
 
 
@@ -49,30 +50,36 @@ void Frame::UpdateDTMap() {
 void Frame::UpdateDTMap(const std::vector<cv::Point> &contourX2D) {
     if(contourX2D.empty())
         return;
+    vector<float> weights(2,Config::configInstance().IMG_DT_WEIGHT);
+
     vector<vector<Point>> contours;
     contours.push_back(contourX2D);
     cv::drawContours(bound_map, contours,-1, Scalar(255), CV_FILLED);
 
     cv::Mat dt1(this->bound_map.size(),CV_32FC1),dt2(this->bound_map.size(),CV_32FC1);
     this->dt= cv::Mat(this->bound_map.size(),CV_32FC1);
-    cv::distanceTransform(this->bound_map,dt1,CV_DIST_L2,3);//inside
-    cv::distanceTransform(255-this->bound_map,dt2,CV_DIST_L2,3);//outside
+    distanceTransform(bound_map,dt1,dtLocationInside,weights);
+    distanceTransform(255-bound_map,dt2,dtLocationOutside,weights);
+
+//    cv::distanceTransform(this->bound_map,dt1,CV_DIST_L2,3);//inside
+//    cv::distanceTransform(255-this->bound_map,dt2,CV_DIST_L2,3);//outside
 
 
     this->dt= dt2-dt1;
-
+   // cout<<"dt"<<dt<<endl;
 
 }
-cv::Point Frame::nearstContourP(const cv::Point &point) {
+cv::Point Frame::GetNearstContourP(const cv::Point &point, const cv::Mat &dtLocation,const int iLevel) {
     int x= point.y;
     int y= point.x;
 
     int *_locations=(int *)dtLocation.data;
-    Config &gConfig = Config::configInstance();
-
-    while(_locations[y + gConfig.VIDEO_WIDTH * x]!=x||_locations[gConfig.VIDEO_HEIGHT *gConfig.VIDEO_WIDTH+y + gConfig.VIDEO_WIDTH * x]!=y){
-        x=_locations[y + gConfig.VIDEO_WIDTH * x];
-        y=_locations[gConfig.VIDEO_HEIGHT *gConfig.VIDEO_WIDTH+y + gConfig.VIDEO_WIDTH* x];
+    Config &g_Config = Config::configInstance();
+    int weight = g_Config.VIDEO_WIDTH /std:: pow(2,iLevel),
+            height = g_Config.VIDEO_HEIGHT /std:: pow(2,iLevel);
+    while(_locations[y + weight * x]!=x||_locations[height *weight+y + weight * x]!=y){
+        x=_locations[y + weight * x];
+        y=_locations[height *weight+y + weight* x];
     }
     return Point(y,x);
 }

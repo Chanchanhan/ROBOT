@@ -7,6 +7,7 @@
 #include "GlobalConfig.h"
 #include "Region.h"
 #include "MySolver.h"
+#include "Render.h"
 using namespace cv;
 using namespace std;
 using namespace ceres;
@@ -33,6 +34,13 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         cur_frame_->m_pose = last_frame_->m_pose;
     }
     for(int iLevel=Config::configInstance().IMG_PYR_NUMBER-1;iLevel>=0;iLevel--){
+//        ORD::Render render;
+//        char* renderName="render";
+//        render.init(model_.intrinsics[iLevel],
+//                    Config::configInstance().VIDEO_WIDTH*std::pow(0.5,Config::configInstance().IMG_PYR_NUMBER-iLevel),
+//                    Config::configInstance().VIDEO_HEIGHT*std::pow(0.5,Config::configInstance().IMG_PYR_NUMBER-iLevel),
+//                    0,&renderName);
+
 #ifdef   PROJECT_WITH_GT
         model_.GetContourPointsAndIts3DPoints(
                 cur_frame->gt_Pose, cur_frame_->VerticesNear2ContourX3D,
@@ -58,6 +66,7 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         last_frame_->Segment(last_frame_->imgPyramid[iLevel],last_frame_->contourX2D, last_frame_->segmentation,last_frame_->bound_map);
 
 #endif
+
 
 
 
