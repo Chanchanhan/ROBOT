@@ -39,15 +39,15 @@ void Model::ChoosePointsNearContour(FramePtr frame, std::vector<cv::Point3d> &ve
     if (totalN > Config::ConfigInstance().TK_VER_NUMBER) {
         totalN=Config::ConfigInstance().TK_VER_NUMBER;
     }
-    int near[4][2] = {{2,  0},
-                      {0,  -2},
-                      {0,  2},
-                      {-2, 0}};
+    int near[4][2] = {{8,  0},
+                      {0,  -8},
+                      {0,  8},
+                      {-8, 0}};
 
     for(int i=0;i<totalN;i++){
         for(int j=0;j<4;j++){
             cv::Point xi=cv::Point(contour[randoms[i]].x+near[j][0],contour[randoms[i]].y+near[j][1]);
-            if(frame->dt.at<float>(xi)>=0){
+            if(frame->dt.at<float>(xi)>=0.05){
                 xi= frame->GetNearstContourP(xi,frame->dtLocationOutside,iLevel);
             }
             cv::Point3f Xi=BackProjectPoint(xi);
