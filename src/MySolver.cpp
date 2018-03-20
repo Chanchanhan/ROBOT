@@ -22,10 +22,10 @@ MySolver::MySolver(cv::Mat &intrinsic){
     }
 }
 void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
-    for(int k=0;k<option.max_iterations;k++){
+    cur_frame->UpdatePointAndDTMap(cur_frame->m_pose,model,iLevel);
+
+    for(int interatorIndex=0;interatorIndex<option.max_iterations;interatorIndex++){
 //        LOG(INFO)<<cur_frame->m_pose.log();
-
-
 
         Sophus::Vector6d jacobians=Sophus::Vector6d::Zero();
         Sophus::Vector6d bs=Sophus::Vector6d::Zero();
@@ -120,7 +120,14 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
 
             LOG(WARNING)<<"energy become smaller:  inital = "<<e_inital<<" ,final = "<<e_final<<
                         " , initial finalWrongJudgeCnt = "<<initWrongJudgeCnt<<", final finalWrongJudgeCnt = "<<finalWrongJudgeCnt ;
-             cv::waitKey(0);
+            //draw out
+            cv::Mat out = cur_frame->img.clone();
+            model->DisplayCV(cur_frame->m_pose, {0, 255, 0}, out);
+            imshow("outPut",out);
+            cv::waitKey(0);
+
+            cur_frame->UpdatePointAndDTMap(cur_frame->m_pose,model,iLevel);
+
         }
     }
 }
