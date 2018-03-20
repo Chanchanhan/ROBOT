@@ -12,8 +12,6 @@ public:
 	cv::Mat img;
     //data of py
     std::vector<cv::Mat> imgPyramid;
-    std::vector<cv::Mat> fw_posteriorPyramid;
-    std::vector<cv::Mat> bg_posteriorPyramid;
     cv::Mat fw_posterior;
     cv::Mat bg_posterior;
 	//SE3D dpose;
@@ -31,8 +29,6 @@ public:
 	std::vector<cv::Point> contourX2D;
 	std::vector<cv::Point> gt_contourX2D;
 
-    double fw_prior;
-    double bg_prior;
 
 	unsigned int index;
 public:

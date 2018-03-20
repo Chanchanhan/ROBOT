@@ -26,13 +26,11 @@ namespace ORD
         static void init(cv::Mat& calibration, int width, int height, int argc, char** argv);
         static void reshape(int width, int height);
         static void display(void);
-        static void display_wgf(void);
         /*static void mouse(int button, int state, int x, int y);
         static void mouseMovement(int x, int y);*/
         static void buildProjectionMatrix(const cv::Mat& calibration, GLfloat* projectionMatrix);
         static void matrixFromCV2GL(const cv::Mat& cv_matrix, GLfloat* gl_matrix);
         static void rendering();
-        static void rendering_for_vg();
         static cv::Point3f get3DPos(int x, int y);
         static cv::Mat getRenderedImg();
         static cv::Mat getRenderedImg(const cv::Point p1, const cv::Point p2);

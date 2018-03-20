@@ -10,6 +10,7 @@
 
 using namespace ORD;
 cv::Mat m_calibration;
+cv::Mat t_calibration;
 int Render::m_width;
 int Render::m_height;
 uchar* Render::m_renderImg;
@@ -42,6 +43,7 @@ void ShapePoseInfo::setBoundBox()
 void Render::init(cv::Mat& calibration, int width, int height, int argc, char** argv)
 {
     m_calibration = calibration;
+    t_calibration = calibration;
     m_width = width;
     m_height = height;
     m_renderImg = new uchar[width*height*3];

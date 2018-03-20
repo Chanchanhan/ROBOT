@@ -46,10 +46,11 @@ void Frame::UpdateDTMap() {
 
 }
 void Frame::UpdatePointAndDTMap(const Sophus::SE3d &newPose, Model *model, const int iLevel) {
+    model->DisplayGL(newPose,iLevel);
     model->GetContour(newPose,contourX2D,iLevel);
     UpdateDTMap(contourX2D);
-    model->DisplayGL(newPose,iLevel);
-    model->ChoosePointsNearContour(this->VerticesNear2ContourX3D,this->VerticesNear2ContourX2D,contourX2D,iLevel);
+    model->ChoosePointsNearContour(this->VerticesNear2ContourX3D,this->VerticesNear2ContourX2D,contourX2D,this->dt,iLevel);
+
 }
 void Frame::UpdateDTMap(const std::vector<cv::Point> &contourX2D) {
     if(contourX2D.empty())
@@ -70,7 +71,10 @@ void Frame::UpdateDTMap(const std::vector<cv::Point> &contourX2D) {
 
 
     this->dt= dt2-dt1;
-   // cout<<"dt"<<dt<<endl;
+//    cout<<"dt1"<<dt1<<endl;
+//    cout<<"dt2"<<dt2<<endl;
+//
+//    cout<<"dt"<<dt<<endl;
 
 }
 cv::Point Frame::GetNearstContourP(const cv::Point &point, const cv::Mat &dtLocation,const int iLevel) {

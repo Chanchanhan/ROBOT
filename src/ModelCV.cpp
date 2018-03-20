@@ -24,7 +24,7 @@ void Model::GetContour(const Sophus::SE3d &pose,std::vector<cv::Point> &resConto
 
 }
 void Model::ChoosePointsNearContour(std::vector<cv::Point3d> &verticesContour_Xs,
-                                    std::vector<cv::Point2d> &verticesContour_xs, const std::vector<cv::Point> &contour,
+                                    std::vector<cv::Point2d> &verticesContour_xs, const std::vector<cv::Point> &contour,const cv::Mat &dt,
                                     const int iLevel) {
     verticesContour_Xs.resize(0);
     verticesContour_xs.resize(0);
@@ -49,11 +49,9 @@ void Model::ChoosePointsNearContour(std::vector<cv::Point3d> &verticesContour_Xs
                       {-2, -2}};
 
     for(int i=0;i<totalN;i++){
-        for(int j=0;j<4;j++){
+        for(int j=0;j<8;j++){
             cv::Point xi=cv::Point(contour[randoms[i]].x+near[j][0],contour[randoms[i]].y+near[j][1]);
-//            if(frame->dt.at<float>(xi)>=0.05){
-//                xi= frame->GetNearstContourP(xi,frame->dtLocationOutside,iLevel);
-//            }
+
             cv::Point3f Xi=BackProjectPoint(xi);
            // Xi.z=1;
 
@@ -249,6 +247,7 @@ void Model::DisplayGL(const Sophus::SE3d &pose ,const int iLevel) {
     shapePoseInfo.m_shape = model_;
     render.matrixFromCV2GL(extrinsic,shapePoseInfo.mv_matrix);
     render.m_shapePoseInfo.push_back(shapePoseInfo);
+    render.reshape(Config::ConfigInstance().VIDEO_WIDTH/pow(2,iLevel),Config::ConfigInstance().VIDEO_HEIGHT/pow(2,iLevel));
     render.rendering();
     render.getDepthImg();
 }

@@ -39,7 +39,7 @@ void Model::SetIntrinsic() {
     render.init(intrinsic,
                 Config::ConfigInstance().VIDEO_WIDTH,
                 Config::ConfigInstance().VIDEO_HEIGHT,
-                0,&renderName);
+                1,&renderName);
 
 }
 

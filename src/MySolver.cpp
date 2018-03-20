@@ -13,8 +13,8 @@ MySolver::MySolver(cv::Mat &intrinsic){
     option.max_wrong_point= Config::ConfigInstance().SV_MAX_WRONG_POINT;
     option.lamda= Config::ConfigInstance().SV_LAMDA_b;
     option.energyLittle=0.01;
-    option.lamdaSmaller=0.1;
-    option.energyOut=10;
+    option.lamdaSmaller=0.5;
+    option.energyOut=100;
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             K_(i,j) = intrinsic.at<float>(i,j);
@@ -23,6 +23,9 @@ MySolver::MySolver(cv::Mat &intrinsic){
 }
 void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
     cur_frame->UpdatePointAndDTMap(cur_frame->m_pose,model,iLevel);
+    LOG(INFO)<<"iLevel = "<<iLevel;
+    option.He_b= Config::ConfigInstance().SV_HE_b / std::pow(8.0,iLevel);
+    if(iLevel) cv::waitKey(0);
 
     for(int interatorIndex=0;interatorIndex<option.max_iterations;interatorIndex++){
 //        LOG(INFO)<<cur_frame->m_pose.log();
@@ -106,7 +109,8 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
                 cur_frame->UpdateDTMap(newContour);
             }
             // break;
-        }else if(fabs(e_final-e_inital)<option.energyLittle){
+        }
+        else if(fabs(e_final-e_inital)<option.energyLittle){
 
             LOG(INFO)<<"energy change little:  inital = "<<e_inital<<" ,final = "<<e_final;
 //            LOG(INFO)<<"update :"<<update;
@@ -117,7 +121,6 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
 
         else {
             ComputeEnergyAndDraw(cur_frame,cur_frame->VerticesNear2ContourX3D,e_final,finalWrongJudgeCnt,0,"final points",iLevel);
-
             LOG(WARNING)<<"energy become smaller:  inital = "<<e_inital<<" ,final = "<<e_final<<
                         " , initial finalWrongJudgeCnt = "<<initWrongJudgeCnt<<", final finalWrongJudgeCnt = "<<finalWrongJudgeCnt ;
             //draw out
@@ -132,7 +135,8 @@ void MySolver::Solve(FramePtr cur_frame,const int &iLevel) {
     }
 }
 
-void MySolver::ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt, const bool  _debug) {
+void MySolver::ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt,
+                             const bool  _debug) {
     energySum=0;
     k_th_tmp=0;
     wrongPointCnt=0;
@@ -144,7 +148,8 @@ void MySolver::ComputeEnergy(const FramePtr cur_frame,const std::vector<cv::Poin
         }
     }
 }
-void MySolver::ComputeEnergyAndDraw(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt, const bool  _debug,const std::string owner,const int iLevel) {
+void MySolver::ComputeEnergyAndDraw(const FramePtr cur_frame,const std::vector<cv::Point3d> &Xs, double &energySum,int &wrongPointCnt,
+                                    const bool  _debug,const std::string owner,const int iLevel) {
     if(_debug) LOG(INFO)<<owner<<" ComputeEnergyAndDraw";
     energySum=0;
     k_th_tmp=0;
@@ -274,7 +279,6 @@ bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
         LOG(INFO)<<"energy is nan";
         return false;
     }
-    double  fwp=cur_frame->bg_posterior.at<double>(x_plane);
 
     if( cur_frame->bg_posterior.at<double>(x_plane)>0.5 &&He > 0.5){
         //       LOG(WARNING)<<"Wrong judge :  b->f ,  this x energy = "<<energy;
@@ -315,12 +319,12 @@ bool MySolver::Evaluate(const FramePtr cur_frame,const cv::Point3d &X_,
 
     cv::Point nearstPoint = cur_frame->GetNearstContourP(x_plane,
                     cur_frame->dt.at<float>(x_plane)>0? cur_frame->dtLocationOutside:cur_frame->dtLocationInside,iLevel);
-    j_Phi_x(0,0)=(x_plane.x - nearstPoint.x)/fabs(cur_frame->dt.at<float>(x_plane));
-    j_Phi_x(0,1)=(x_plane.y - nearstPoint.y)/fabs(cur_frame->dt.at<float>(x_plane));
-//    j_Phi_x(0, 0) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x + 1, x_plane.y)) -
-//                            cur_frame->dt.at<float>(cv::Point(x_plane.x - 1, x_plane.y)));
-//    j_Phi_x(0, 1) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y + 1)) -
-//                            cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y - 1)));
+//    j_Phi_x(0,0)=(x_plane.x - nearstPoint.x)/fabs(cur_frame->dt.at<float>(x_plane));
+//    j_Phi_x(0,1)=(x_plane.y - nearstPoint.y)/fabs(cur_frame->dt.at<float>(x_plane));
+    j_Phi_x(0, 0) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x + 1, x_plane.y)) -
+                            cur_frame->dt.at<float>(cv::Point(x_plane.x - 1, x_plane.y)));
+    j_Phi_x(0, 1) = 0.5f * (cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y + 1)) -
+                            cur_frame->dt.at<float>(cv::Point(x_plane.x, x_plane.y - 1)));
     Eigen::MatrixXd jacTmp = leftE * j_Phi_x * j_X_Lie;
 
     for(int i=0;i<6;i++)
