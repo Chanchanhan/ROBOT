@@ -75,11 +75,13 @@ void Tracker::ProcessFrame(FramePtr cur_frame) {
         cur_frame_->Segment(cur_frame_->imgPyramid[iLevel],cur_frame_->contourX2D, cur_frame_->segmentation,cur_frame_->bound_map);
         last_frame_->Segment(last_frame_->imgPyramid[iLevel],last_frame_->contourX2D, last_frame_->segmentation,last_frame_->bound_map);
 #endif
-        cur_frame_->UpdateDTMap();
-        model_.DisplayGL(cur_frame_->m_pose,iLevel);
-        model_.ChoosePointsNearContour(cur_frame,
-                                       cur_frame->VerticesNear2ContourX3D,cur_frame->VerticesNear2ContourX2D,
-                                       cur_frame->contourX2D,iLevel);
+
+        cur_frame_->UpdatePointAndDTMap(cur_frame_->m_pose,&model_,iLevel);
+//        cur_frame_->UpdateDTMap();
+   //     model_.DisplayGL(cur_frame_->m_pose,iLevel);
+    //    model_.ChoosePointsNearContour(cur_frame,
+//                                       cur_frame->VerticesNear2ContourX3D,cur_frame->VerticesNear2ContourX2D,
+//                                       cur_frame->contourX2D,iLevel);
 
         Mat input = cur_frame_->img.clone();
 

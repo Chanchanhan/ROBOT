@@ -23,7 +23,7 @@ void Model::GetContour(const Sophus::SE3d &pose,std::vector<cv::Point> &resConto
     resContour = contours[0];
 
 }
-void Model::ChoosePointsNearContour(FramePtr frame, std::vector<cv::Point3d> &verticesContour_Xs,
+void Model::ChoosePointsNearContour(std::vector<cv::Point3d> &verticesContour_Xs,
                                     std::vector<cv::Point2d> &verticesContour_xs, const std::vector<cv::Point> &contour,
                                     const int iLevel) {
     verticesContour_Xs.resize(0);
@@ -171,7 +171,6 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
     cv::Mat extrinsic(4, 4, CV_32FC1);
     extrinsic = Se2cvf(pose);
     cv::Mat out = frame.clone();
-    DisplayCV(pose,Scalar(100,100,100),out,iLevel);
     for(int i=0;i<Xs.size();i++){
         if(Config::ConfigInstance().pointState[i]){
             DrawOnePoint(extrinsic,Xs[i],frame,cv::Scalar(0,0,255), iLevel);//inside
@@ -191,6 +190,7 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
     cv::Mat pt_status = frame.fw_posterior > frame.bg_posterior;
     cv::Mat out = frame.imgPyramid[iLevel].clone();
    // DisplayCV(pose, cv::Scalar(0,0,0),out,iLevel);
+    DisplayCV(pose,Scalar(100,100,100),out,iLevel);
 
     int wrong=0;
     for(int i=0;i<Xs.size();i++){

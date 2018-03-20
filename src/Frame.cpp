@@ -6,7 +6,7 @@
 
 #include "GlobalConfig.h"
 #include "DT.h"
-
+#include "Model.h"
 #include "Region.h"
 
 using namespace cv;
@@ -44,9 +44,13 @@ void Frame::UpdateDTMap() {
     distanceTransform(255-bound_map,dt2,dtLocationOutside,weights);
     this->dt= dt2-dt1;
 
-
 }
-
+void Frame::UpdatePointAndDTMap(const Sophus::SE3d &newPose, Model *model, const int iLevel) {
+    model->GetContour(newPose,contourX2D,iLevel);
+    UpdateDTMap(contourX2D);
+    model->DisplayGL(newPose,iLevel);
+    model->ChoosePointsNearContour(this->VerticesNear2ContourX3D,this->VerticesNear2ContourX2D,contourX2D,iLevel);
+}
 void Frame::UpdateDTMap(const std::vector<cv::Point> &contourX2D) {
     if(contourX2D.empty())
         return;

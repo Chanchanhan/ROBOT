@@ -29,7 +29,7 @@ public:
                                         std::vector<cv::Point2d> &verticesContour_xs,
                                         std::vector<cv::Point> &resContour,
                                         const int iLevel = 0);
-    void ChoosePointsNearContour(FramePtr frame, std::vector<cv::Point3d> &verticesContour_Xs,
+    void ChoosePointsNearContour(std::vector<cv::Point3d> &verticesContour_Xs,
                                         std::vector<cv::Point2d> &verticesContour_xs,
                                         const std::vector<cv::Point> &contour,
                                         const int iLevel = 0);

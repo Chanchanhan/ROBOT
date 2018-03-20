@@ -3,7 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include "Pose.h"
 #include <memory>
-
+class Model;
 class Region;
 class Frame
 {
@@ -40,6 +40,7 @@ public:
 	void Segment(const cv::Mat &inPutImg,const std::vector<cv::Point> &contourX2D,cv::Mat &segmentation,cv::Mat &bound_map);
 
 	void UpdateDTMap();
+	void UpdatePointAndDTMap(const Sophus::SE3d &newPose, Model *model, const int iLevel);
 	void UpdateDTMap(const std::vector<cv::Point> &contourX2D);
     void DTMap(const cv::Mat &inPut,cv::Mat &dt,cv::Mat &dtLocation);
     void GetPyraid(const int &nPyraid);
