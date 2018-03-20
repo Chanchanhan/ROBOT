@@ -39,17 +39,21 @@ void Model::ChoosePointsNearContour(FramePtr frame, std::vector<cv::Point3d> &ve
     if (totalN > Config::ConfigInstance().TK_VER_NUMBER) {
         totalN=Config::ConfigInstance().TK_VER_NUMBER;
     }
-    int near[4][2] = {{8,  0},
-                      {0,  -8},
-                      {0,  8},
-                      {-8, 0}};
+    int near[8][2] = {{4,  0},
+                      {0,  -4},
+                      {0,  4},
+                      {-4, 0},
+                      {2,  2},
+                      {2,  -2},
+                      {-2,  2},
+                      {-2, -2}};
 
     for(int i=0;i<totalN;i++){
         for(int j=0;j<4;j++){
             cv::Point xi=cv::Point(contour[randoms[i]].x+near[j][0],contour[randoms[i]].y+near[j][1]);
-            if(frame->dt.at<float>(xi)>=0.05){
-                xi= frame->GetNearstContourP(xi,frame->dtLocationOutside,iLevel);
-            }
+//            if(frame->dt.at<float>(xi)>=0.05){
+//                xi= frame->GetNearstContourP(xi,frame->dtLocationOutside,iLevel);
+//            }
             cv::Point3f Xi=BackProjectPoint(xi);
            // Xi.z=1;
 
@@ -167,7 +171,7 @@ void Model::DrawPoints(const Sophus::SE3d &pose, const std::vector<cv::Point3d> 
     cv::Mat extrinsic(4, 4, CV_32FC1);
     extrinsic = Se2cvf(pose);
     cv::Mat out = frame.clone();
-
+    DisplayCV(pose,Scalar(100,100,100),out,iLevel);
     for(int i=0;i<Xs.size();i++){
         if(Config::ConfigInstance().pointState[i]){
             DrawOnePoint(extrinsic,Xs[i],frame,cv::Scalar(0,0,255), iLevel);//inside
