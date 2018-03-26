@@ -1,0 +1,43 @@
+%YAML:1.0
+
+# MAIN
+
+LOG_Threshold: 0
+Init_Frame_Index: 0
+USE_GT_DATA: 0
+
+
+# Input/Output directories and Sets
+Output.Directory.LOG_DIR: "./Log/"
+
+
+USE_VIDEO: 0
+Calib_FX: 832.560809
+Calib_FY: 832.560809
+Calib_CX: 319.5
+Calib_CY: 239.5
+Input.Directory.Obj: "/home/qqh/DataSets/testdata-robot/model.obj"
+Input.Directory.Video: "/home/qqh/DataSets/testdata-robot/frames/"
+Input.Directory.GroudTruth: "./data/cat/cat_gtpose.txt"
+Input.Directory.DISTORTIONS: "./data/cat/distortions.txt"
+VIDEO_WIDTH: 640
+VIDEO_HEIGHT: 480
+
+#CV
+CV_DRAW_FRAME: 1
+
+#track
+TK_VER_NUMBER: 100
+
+#IMG
+IMG_PYR_NUMBER: 3
+IMG_DT_WEIGHT: 2
+
+#Solver
+SV_HE_b : 500
+SV_MAX_WRONG_POINT: 15
+SV_MAX_ITERATIONS : 3
+SV_E_TOO_SMALL_SIZE : 0.0
+SV_E_OK : 0
+SV_LAMDA_b : 1
+SV_LAMDA_SMALLER : 0.1
